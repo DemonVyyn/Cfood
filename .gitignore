@@ -1,0 +1,25 @@
+# Flutter
+mobile/.dart_tool/
+mobile/build/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/.idea/
+mobile/.vscode/
+mobile/android/.gradle/
+mobile/android/local.properties
+mobile/windows/flutter/ephemeral/
+mobile/linux/flutter/ephemeral/
+
+# Laravel
+backend/vendor/
+backend/node_modules/
+backend/public/build/
+backend/storage/logs/*
+backend/storage/framework/cache/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+backend/.env
+
+# General
+*.log
+.env
