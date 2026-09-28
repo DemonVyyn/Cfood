@@ -3,19 +3,15 @@ import 'package:flutter/material.dart';
 import 'widgets/profile_header.dart';
 import 'widgets/profile_menu_item.dart';
 import 'widgets/profile_stat_card.dart';
-import '../../../widgets/app_bottom_nav.dart';
+import '../../../widgets/curved_bottom_nav.dart';
 
 class ProfilePage extends StatelessWidget {
-  const ProfilePage({
-    super.key,
-  });
+  const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Profil"),
-      ),
+      appBar: AppBar(title: const Text("Profil")),
 
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -66,10 +62,7 @@ class ProfilePage extends StatelessWidget {
             title: "Edit Profil",
           ),
 
-          const ProfileMenuItem(
-            icon: Icons.history,
-            title: "Riwayat Pesanan",
-          ),
+          const ProfileMenuItem(icon: Icons.history, title: "Riwayat Pesanan"),
 
           const ProfileMenuItem(
             icon: Icons.notifications_none,
@@ -86,16 +79,10 @@ class ProfilePage extends StatelessWidget {
             title: "Pengaturan",
           ),
 
-          const ProfileMenuItem(
-            icon: Icons.logout,
-            title: "Logout",
-          ),
+          const ProfileMenuItem(icon: Icons.logout, title: "Logout"),
         ],
       ),
-      bottomNavigationBar:
-    const AppBottomNav(
-  currentIndex: 3,
-),
+      // Bottom navigation is now handled by HomeShell (SPA).
     );
   }
 }

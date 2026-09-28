@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'widgets/notification_card.dart';
-import '../../../widgets/app_bottom_nav.dart';
+import '../../../widgets/curved_bottom_nav.dart';
 
 class NotificationPage extends StatelessWidget {
   const NotificationPage({super.key});
@@ -9,9 +9,7 @@ class NotificationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Notifikasi"),
-      ),
+      appBar: AppBar(title: const Text("Notifikasi")),
 
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -25,16 +23,12 @@ class NotificationPage extends StatelessWidget {
 
           NotificationCard(
             title: "Hemat Food Waste",
-            message:
-                "Anda berhasil menyelamatkan 1.4kg makanan hari ini.",
+            message: "Anda berhasil menyelamatkan 1.4kg makanan hari ini.",
             time: "1 jam lalu",
           ),
         ],
       ),
-      bottomNavigationBar:
-    const AppBottomNav(
-  currentIndex: 2,
-),
+      // Bottom navigation is now handled by HomeShell (SPA).
     );
   }
 }
