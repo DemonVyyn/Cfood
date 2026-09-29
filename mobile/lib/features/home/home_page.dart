@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-
 import '../../data/dummy_foods.dart';
-
-import '../../widgets/app_bottom_nav.dart';
-
+import '../../widgets/curved_bottom_nav.dart';
 import 'widgets/home_header.dart';
 import 'widgets/search_section.dart';
 import 'widgets/impact_card.dart';
@@ -44,9 +41,7 @@ class HomePage extends StatelessWidget {
               const SizedBox(height: 16),
 
               Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
                     Container(
@@ -75,13 +70,10 @@ class HomePage extends StatelessWidget {
 
               ListView.builder(
                 shrinkWrap: true,
-                physics:
-                    const NeverScrollableScrollPhysics(),
+                physics: const NeverScrollableScrollPhysics(),
                 itemCount: dummyFoods.length,
                 itemBuilder: (context, index) {
-                  return SurplusFoodCard(
-                    food: dummyFoods[index],
-                  );
+                  return SurplusFoodCard(food: dummyFoods[index]);
                 },
               ),
 
@@ -91,9 +83,7 @@ class HomePage extends StatelessWidget {
         ),
       ),
 
-      bottomNavigationBar: const AppBottomNav(
-        currentIndex: 0,
-      ),
+      // Bottom navigation is now handled by HomeShell (SPA).
     );
   }
 }

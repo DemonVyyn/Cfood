@@ -41,8 +41,12 @@ dependencies:
   go_router: ^18.0.1
   image_picker: ^1.1.2
   intl: ^0.20.2
+<<<<<<< HEAD
   geolocator: ^14.0.2
   geocoding: ^4.0.0
+=======
+  curved_navigation_bar: ^1.0.6
+>>>>>>> d99bf897472a52efc720b1018e2c26cc83084fcb
   
 
 dev_dependencies:
