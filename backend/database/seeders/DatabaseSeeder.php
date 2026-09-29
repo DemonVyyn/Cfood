@@ -11,6 +11,9 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserSeeder::class,
             MenuSeeder::class,
+
+            // Seed dummy accounts for customer and mitra
+            DummyUserSeeder::class,
         ]);
     }
 }
