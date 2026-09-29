@@ -25,7 +25,7 @@ class MerchantOrderCard
         ),
 
         title: const Text(
-          'Dimas Pratama',
+          'Pratama',
         ),
 
         subtitle: const Text(

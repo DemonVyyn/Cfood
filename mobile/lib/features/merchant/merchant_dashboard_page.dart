@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/merchant_provider.dart';
+import '../../providers/location_provider.dart';
 
 import 'widgets/merchant_header.dart';
 import 'widgets/summary_card.dart';
@@ -17,19 +18,13 @@ class MerchantDashboardPage extends StatefulWidget {
 }
 
 class _MerchantDashboardPageState extends State<MerchantDashboardPage> {
-  bool _loaded = false;
-
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    if (!_loaded) {
-      _loaded = true;
-
-      Future.microtask(() {
-        context.read<MerchantProvider>().loadDashboard();
-      });
-    }
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<MerchantProvider>().loadDashboard();
+    });
   }
 
   @override
@@ -37,6 +32,8 @@ class _MerchantDashboardPageState extends State<MerchantDashboardPage> {
     final provider = context.watch<MerchantProvider>();
 
     final data = provider.dashboard;
+
+    final locationProvider = context.watch<LocationProvider>();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8FA),
@@ -53,7 +50,11 @@ class _MerchantDashboardPageState extends State<MerchantDashboardPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    MerchantHeader(storeName: data.storeName),
+                    MerchantHeader(
+                      storeName: data.storeName,
+                      location: locationProvider.locationName,
+                      notificationCount: 3,
+                    ),
 
                     const SizedBox(height: 20),
 

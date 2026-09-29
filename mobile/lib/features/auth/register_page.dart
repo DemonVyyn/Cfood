@@ -404,8 +404,9 @@ class _RegisterPageState
                                             .trim(),
                                   );
 
-                                  if (!mounted)
-                                    return;
+                                  if (!mounted) {
+                                      return;
+                                  }
 
                                   if (success) {
                                     messenger

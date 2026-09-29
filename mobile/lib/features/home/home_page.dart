@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../data/dummy_foods.dart';
-import '../../widgets/curved_bottom_nav.dart';
 import 'widgets/home_header.dart';
 import 'widgets/search_section.dart';
 import 'widgets/impact_card.dart';

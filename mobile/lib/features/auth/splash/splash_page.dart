@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../providers/auth_provider.dart';
+import '../../../providers/location_provider.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -17,42 +18,45 @@ class _SplashPageState
   void initState() {
     super.initState();
 
-    checkAuth();
+    initializeApp();
   }
 
-  Future<void> checkAuth() async {
-    final auth =
-        Provider.of<AuthProvider>(
-      context,
-      listen: false,
-    );
+  Future<void> initializeApp() async {
+  await context
+      .read<LocationProvider>()
+      .startTracking();
 
-    final loggedIn =
-        await auth.checkLogin();
+  final auth =
+      Provider.of<AuthProvider>(
+    context,
+    listen: false,
+  );
 
-    if (!mounted) return;
+  final loggedIn =
+      await auth.checkLogin();
 
-    if (loggedIn) {
-      if (auth.user?.role ==
-          'mitra') {
-        Navigator.pushReplacementNamed(
-          context,
-          '/merchant',
-        );
-      } else {
-        Navigator.pushReplacementNamed(
-          context,
-          '/home',
-        );
-      }
+  if (!mounted) return;
+
+  if (loggedIn) {
+    if (auth.user?.role ==
+        'mitra') {
+      Navigator.pushReplacementNamed(
+        context,
+        '/merchant',
+      );
     } else {
       Navigator.pushReplacementNamed(
         context,
-        '/login',
+        '/home',
       );
     }
+  } else {
+    Navigator.pushReplacementNamed(
+      context,
+      '/login',
+    );
   }
-
+}
   @override
   Widget build(BuildContext context) {
     return const Scaffold(

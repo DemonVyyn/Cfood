@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'widgets/profile_header.dart';
 import 'widgets/profile_menu_item.dart';
 import 'widgets/profile_stat_card.dart';
-import '../../../widgets/curved_bottom_nav.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
