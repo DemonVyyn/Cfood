@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/food_provider.dart';
 
-import 'features/home/home_page.dart';
 import 'widgets/home_shell.dart'; // Added to provide HomeShell with navigation bar
 
 import 'features/auth/login_page.dart';
@@ -19,12 +18,8 @@ import 'features/customer/notification/notification_page.dart';
 
 import 'features/pickup/pickup_qr_page.dart';
 
-import 'features/merchant/merchant_dashboard_page.dart';
-
-import 'features/merchant/products/product_list_page.dart';
-import 'features/merchant/orders/order_list_page.dart';
 import 'features/merchant/qr_scan/scan_qr_page.dart';
-import 'features/merchant/store_profile/store_profile_page.dart';
+import 'widgets/merchant_shell.dart';
 
 import 'providers/merchant_provider.dart';
 import 'providers/merchant_product_provider.dart';
@@ -67,9 +62,9 @@ class MyApp extends StatelessWidget {
 
         '/pickup': (_) => const PickupQrPage(),
 
-        '/merchant': (_) => const MerchantDashboardPage(),
+        '/merchant': (_) => const MerchantShell(),
 
-        '/merchant-products': (_) => const ProductListPage(),
+        '/merchant-products': (_) => const MerchantShell(initialIndex: 1),
 
         '/merchant-add-product': (_) => const AddProductPage(),
 
@@ -79,11 +74,11 @@ class MyApp extends StatelessWidget {
           return EditProductPage(productId: productId);
         },
 
-        '/merchant-orders': (_) => const OrderListPage(),
+        '/merchant-orders': (_) => const MerchantShell(initialIndex: 2),
 
         '/merchant-scan': (_) => const ScanQrPage(),
 
-        '/merchant-store': (_) => const StoreProfilePage(),
+        '/merchant-store': (_) => const MerchantShell(initialIndex: 3),
       },
       home: const SplashPage(),
     );
