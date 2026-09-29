@@ -5,13 +5,13 @@ import 'providers/auth_provider.dart';
 import 'providers/food_provider.dart';
 
 import 'features/home/home_page.dart';
+import 'widgets/home_shell.dart'; // Added to provide HomeShell with navigation bar
 
 import 'features/auth/login_page.dart';
 import 'features/auth/register_page.dart';
 import 'features/auth/role_selection_page.dart';
 
 import 'features/auth/splash/splash_page.dart';
-
 
 import 'features/customer/profile/profile_page.dart';
 import 'features/customer/order_history/order_history_page.dart';
@@ -31,23 +31,14 @@ import 'providers/merchant_product_provider.dart';
 import 'features/merchant/products/add_product_page.dart';
 import 'features/merchant/products/edit_product_page.dart';
 
-
 void main() {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (_) => AuthProvider(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => FoodProvider(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => MerchantProvider(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => MerchantProductProvider(),
-        ),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => FoodProvider()),
+        ChangeNotifierProvider(create: (_) => MerchantProvider()),
+        ChangeNotifierProvider(create: (_) => MerchantProductProvider()),
       ],
       child: const MyApp(),
     ),
@@ -63,46 +54,37 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'CheaFood',
       routes: {
-  '/role': (_) => const RoleSelectionPage(),
-  '/login': (_) => const LoginPage(),
-  '/register': (_) => const RegisterPage(),
+        '/role': (_) => const RoleSelectionPage(),
+        '/login': (_) => const LoginPage(),
+        '/register': (_) => const RegisterPage(),
 
-  '/home': (_) => const HomePage(),
+        // Use HomeShell which contains the curved bottom navigation bar.
+        '/home': (_) => const HomeShell(),
 
-  '/profile': (_) => const ProfilePage(),
-  '/history': (_) => const OrderHistoryPage(),
-  '/notification': (_) => const NotificationPage(),
+        '/profile': (_) => const ProfilePage(),
+        '/history': (_) => const OrderHistoryPage(),
+        '/notification': (_) => const NotificationPage(),
 
-  '/pickup': (_) => const PickupQrPage(),
+        '/pickup': (_) => const PickupQrPage(),
 
-  '/merchant': (_) => const MerchantDashboardPage(),
+        '/merchant': (_) => const MerchantDashboardPage(),
 
-  '/merchant-products': (_) =>
-      const ProductListPage(),
+        '/merchant-products': (_) => const ProductListPage(),
 
-  '/merchant-add-product': (_) =>
-    const AddProductPage(),
+        '/merchant-add-product': (_) => const AddProductPage(),
 
-  '/merchant-edit-product': (context) {
-  final productId =
-      ModalRoute.of(context)!
-          .settings
-          .arguments as int;
+        '/merchant-edit-product': (context) {
+          final productId = ModalRoute.of(context)!.settings.arguments as int;
 
-  return EditProductPage(
-    productId: productId,
-  );
-},
+          return EditProductPage(productId: productId);
+        },
 
-  '/merchant-orders': (_) =>
-      const OrderListPage(),
+        '/merchant-orders': (_) => const OrderListPage(),
 
-  '/merchant-scan': (_) =>
-      const ScanQrPage(),
+        '/merchant-scan': (_) => const ScanQrPage(),
 
-  '/merchant-store': (_) =>
-      const StoreProfilePage(),
-},
+        '/merchant-store': (_) => const StoreProfilePage(),
+      },
       home: const SplashPage(),
     );
   }
