@@ -5,6 +5,9 @@ import 'package:provider/provider.dart';
 import '../../../models/merchant_product_model.dart';
 import '../../../providers/merchant_product_provider.dart';
 
+import '../../../core/utils/currency_input_formatter.dart';
+import 'package:intl/intl.dart';
+
 class EditProductPage extends StatefulWidget {
   final int productId;
 
@@ -92,15 +95,30 @@ class _EditProductPageState
     kategoriController.text =
         result.kategori;
 
-    hargaOriginalController.text =
-        result.originalPrice
-            .toInt()
-            .toString();
+   final rupiah = NumberFormat(
+  '#,###',
+  'id_ID',
+);
 
-    hargaDiskonController.text =
-        result.discountPrice
-            .toInt()
-            .toString();
+hargaOriginalController.text =
+    rupiah
+        .format(
+          result.originalPrice.toInt(),
+        )
+        .replaceAll(
+          ',',
+          '.',
+        );
+
+hargaDiskonController.text =
+    rupiah
+        .format(
+          result.discountPrice.toInt(),
+        )
+        .replaceAll(
+          ',',
+          '.',
+        );
 
     stokController.text =
         result.stock.toString();
@@ -190,11 +208,12 @@ class _EditProductPageState
                 kategoriController
                     .text,
             hargaOriginal:
-                hargaOriginalController
-                    .text,
-            hargaDiskon:
-                hargaDiskonController
-                    .text,
+    hargaOriginalController.text
+        .replaceAll('.', ''),
+
+hargaDiskon:
+    hargaDiskonController.text
+        .replaceAll('.', ''),
             stok:
                 stokController.text,
             expired:
@@ -230,52 +249,71 @@ class _EditProductPageState
     }
   }
 
-  Widget buildField(
-    String label,
-    TextEditingController controller, {
-    bool numberOnly = false,
-    bool readOnly = false,
-    VoidCallback? onTap,
-    int maxLines = 1,
-  }) {
-    return Padding(
-      padding:
-          const EdgeInsets.only(
-        bottom: 12,
-      ),
-      child: TextField(
-        controller: controller,
-        readOnly: readOnly,
-        onTap: onTap,
-        maxLines: maxLines,
-        keyboardType:
-            numberOnly
-                ? TextInputType.number
-                : TextInputType.text,
-        inputFormatters:
-            numberOnly
-                ? [
-                    FilteringTextInputFormatter
-                        .digitsOnly,
-                  ]
-                : null,
-        decoration:
-            InputDecoration(
-          labelText: label,
-          border:
-              const OutlineInputBorder(),
-          suffixIcon:
-              label ==
-                      'Tanggal Expired'
-                  ? const Icon(
-                      Icons
-                          .calendar_month,
-                    )
-                  : null,
+ Widget buildField(
+  String label,
+  TextEditingController controller, {
+  bool numberOnly = false,
+  bool readOnly = false,
+  VoidCallback? onTap,
+  int maxLines = 1,
+}) {
+  return Padding(
+    padding: const EdgeInsets.only(
+      bottom: 14,
+    ),
+    child: TextField(
+      controller: controller,
+      readOnly: readOnly,
+      onTap: onTap,
+      maxLines: maxLines,
+      keyboardType: numberOnly
+          ? TextInputType.number
+          : TextInputType.text,
+      inputFormatters: numberOnly
+          ? [
+              FilteringTextInputFormatter
+                  .digitsOnly,
+              CurrencyInputFormatter(),
+            ]
+          : null,
+      decoration: InputDecoration(
+        labelText: label,
+
+prefixText:
+    label.contains('Harga')
+        ? 'Rp '
+        : null,
+        filled: true,
+        fillColor: Colors.grey.shade50,
+        border: OutlineInputBorder(
+          borderRadius:
+              BorderRadius.circular(
+            16,
+          ),
         ),
+        enabledBorder:
+            OutlineInputBorder(
+          borderRadius:
+              BorderRadius.circular(
+            16,
+          ),
+          borderSide: BorderSide(
+            color:
+                Colors.grey.shade300,
+          ),
+        ),
+        suffixIcon:
+            label ==
+                    'Tanggal Expired'
+                ? const Icon(
+                    Icons
+                        .calendar_month,
+                  )
+                : null,
       ),
-    );
-  }
+    ),
+  );
+}
 
   @override
   Widget build(
@@ -296,83 +334,151 @@ class _EditProductPageState
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Edit Produk',
-        ),
+  backgroundColor: const Color(0xFFF5F7FA),
+
+  appBar: AppBar(
+    elevation: 0,
+    backgroundColor: Colors.green,
+    foregroundColor: Colors.white,
+    centerTitle: true,
+    title: const Text(
+      'Edit Produk',
+      style: TextStyle(
+        fontWeight: FontWeight.bold,
       ),
-      body:
-          SingleChildScrollView(
-        padding:
-            const EdgeInsets.all(
-          16,
+    ),
+  ),
+
+  body: SingleChildScrollView(
+    padding: const EdgeInsets.all(20),
+    child: Column(
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius:
+                BorderRadius.circular(24),
+            boxShadow: [
+  BoxShadow(
+    color: Colors.black.withValues(
+      alpha: 0.05,
+    ),
+    blurRadius: 20,
+    offset: const Offset(
+      0,
+      6,
+    ),
+  ),
+],
+          ),
+          child: Column(
+            crossAxisAlignment:
+                CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Informasi Produk",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight:
+                      FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(
+                height: 20,
+              ),
+
+              buildField(
+                'Nama Produk',
+                namaController,
+              ),
+
+              buildField(
+                'Deskripsi',
+                deskripsiController,
+                maxLines: 4,
+              ),
+
+              buildField(
+                'Kategori',
+                kategoriController,
+              ),
+
+              buildField(
+                'Harga Asli',
+                hargaOriginalController,
+                numberOnly: true,
+              ),
+
+              buildField(
+                'Harga Diskon',
+                hargaDiskonController,
+                numberOnly: true,
+              ),
+
+              buildField(
+                'Stok',
+                stokController,
+                numberOnly: true,
+              ),
+
+              buildField(
+                'Tanggal Expired',
+                expiredController,
+                readOnly: true,
+                onTap: selectDate,
+              ),
+            ],
+          ),
         ),
-        child: Column(
-          children: [
-            buildField(
-              'Nama Produk',
-              namaController,
-            ),
 
-            buildField(
-              'Deskripsi',
-              deskripsiController,
-              maxLines: 4,
-            ),
+        const SizedBox(
+          height: 24,
+        ),
 
-            buildField(
-              'Kategori',
-              kategoriController,
+        SizedBox(
+          width: double.infinity,
+          height: 58,
+          child: ElevatedButton.icon(
+            icon: const Icon(
+              Icons.save,
             ),
-
-            buildField(
-              'Harga Asli',
-              hargaOriginalController,
-              numberOnly: true,
-            ),
-
-            buildField(
-              'Harga Diskon',
-              hargaDiskonController,
-              numberOnly: true,
-            ),
-
-            buildField(
-              'Stok',
-              stokController,
-              numberOnly: true,
-            ),
-
-            buildField(
-              'Tanggal Expired',
-              expiredController,
-              readOnly: true,
-              onTap: selectDate,
-            ),
-
-            const SizedBox(
-              height: 24,
-            ),
-
-            SizedBox(
-              width:
-                  double.infinity,
-              height: 52,
-              child:
-                  ElevatedButton.icon(
-                icon: const Icon(
-                  Icons.save,
-                ),
-                label: const Text(
-                  'Update Produk',
-                ),
-                onPressed:
-                    updateProduct,
+            label: const Text(
+              'Update Produk',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight:
+                    FontWeight.bold,
               ),
             ),
-          ],
+            style:
+                ElevatedButton.styleFrom(
+              backgroundColor:
+                  Colors.green,
+              foregroundColor:
+                  Colors.white,
+              elevation: 0,
+              shape:
+                  RoundedRectangleBorder(
+                borderRadius:
+                    BorderRadius.circular(
+                  18,
+                ),
+              ),
+            ),
+            onPressed:
+                updateProduct,
+          ),
         ),
-      ),
+
+        const SizedBox(
+          height: 20,
+        ),
+      ],
+    ),
+  ),
     );
   }
 }
