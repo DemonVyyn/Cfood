@@ -24,7 +24,7 @@ class AuthLogo extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Mealio',
+              'CFood',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,

@@ -1,11 +1,14 @@
+
 import 'package:flutter/material.dart';
 
 class AuthTabSwitch extends StatelessWidget {
   final bool isLogin;
+  final ValueChanged<bool>? onTabChanged;
 
   const AuthTabSwitch({
     super.key,
     required this.isLogin,
+    this.onTabChanged,
   });
 
   @override
@@ -22,66 +25,61 @@ class AuthTabSwitch extends StatelessWidget {
             child: GestureDetector(
               onTap: () {
                 if (!isLogin) {
-                  Navigator.pushReplacementNamed(
-                    context,
-                    '/login',
-                  );
+                  onTabChanged?.call(true);
                 }
               },
-              child: Container(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeInOut,
                 margin: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
                   color: isLogin
                       ? const Color(0xFF166534)
                       : Colors.transparent,
-                  borderRadius:
-                      BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: Center(
-                  child: Text(
-                    'Masuk',
+                  child: AnimatedDefaultTextStyle(
+                    duration: const Duration(milliseconds: 220),
                     style: TextStyle(
                       color: isLogin
                           ? Colors.white
                           : Colors.black54,
-                      fontWeight:
-                          FontWeight.w600,
+                      fontWeight: FontWeight.w600,
                     ),
+                    child: const Text('Masuk'),
                   ),
                 ),
               ),
             ),
           ),
-
           Expanded(
             child: GestureDetector(
               onTap: () {
                 if (isLogin) {
-                  Navigator.pushReplacementNamed(
-                    context,
-                    '/register',
-                  );
+                  onTabChanged?.call(false);
                 }
               },
-              child: Container(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeInOut,
                 margin: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
                   color: !isLogin
                       ? const Color(0xFF166534)
                       : Colors.transparent,
-                  borderRadius:
-                      BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: Center(
-                  child: Text(
-                    'Daftar',
+                  child: AnimatedDefaultTextStyle(
+                    duration: const Duration(milliseconds: 220),
                     style: TextStyle(
                       color: !isLogin
                           ? Colors.white
                           : Colors.black54,
-                      fontWeight:
-                          FontWeight.w600,
+                      fontWeight: FontWeight.w600,
                     ),
+                    child: const Text('Daftar'),
                   ),
                 ),
               ),

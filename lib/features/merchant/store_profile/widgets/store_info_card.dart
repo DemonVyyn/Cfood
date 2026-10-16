@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../../../providers/merchant_provider.dart';
+import '../edit_store_profile_page.dart';
 
 class StoreInfoCard extends StatelessWidget {
   const StoreInfoCard({super.key});
@@ -8,56 +12,100 @@ class StoreInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: Colors.grey.shade100,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Informasi Toko',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: textColor,
-            ),
-          ),
-          const SizedBox(height: 18),
+    return Consumer<MerchantProvider>(
+      builder: (context, provider, child) {
+        final dashboard = provider.dashboard;
 
-          _buildInfoItem(
-            icon: Icons.location_on_outlined,
-            title: 'Alamat Toko',
-            subtitle: 'Jakarta Selatan',
-          ),
+        final storeName = dashboard?.storeName.trim() ?? '';
 
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            child: Divider(
-              height: 1,
-              color: Colors.grey.shade200,
-            ),
+        return Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: Colors.grey.shade100),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'Informasi Toko',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: textColor,
+                      ),
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: () async {
+                      final updated = await Navigator.push<bool>(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const EditStoreProfilePage(),
+                        ),
+                      );
 
-          _buildInfoItem(
-            icon: Icons.phone_outlined,
-            title: 'Nomor Telepon',
-            subtitle: '08123456789',
+                      if (updated == true && context.mounted) {
+                        await context
+                            .read<MerchantProvider>()
+                            .refreshDashboard();
+                      }
+                    },
+                    icon: const Icon(Icons.edit_outlined, size: 17),
+                    label: const Text('Edit'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: darkGreen,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              _buildInfoItem(
+                icon: Icons.store_outlined,
+                title: 'Nama Toko',
+                subtitle: storeName.isNotEmpty
+                    ? storeName
+                    : 'Nama toko belum tersedia',
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                child: Divider(
+                  height: 1,
+                  color: Colors.grey.shade200,
+                ),
+              ),
+              _buildInfoItem(
+                icon: Icons.location_on_outlined,
+                title: 'Alamat Toko',
+                subtitle: 'Data alamat perlu disediakan oleh API mitra',
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                child: Divider(
+                  height: 1,
+                  color: Colors.grey.shade200,
+                ),
+              ),
+              _buildInfoItem(
+                icon: Icons.phone_outlined,
+                title: 'Nomor Telepon',
+                subtitle: 'Data telepon perlu disediakan oleh API mitra',
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -76,11 +124,7 @@ class StoreInfoCard extends StatelessWidget {
             color: const Color(0xFFE7F9E9),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(
-            icon,
-            color: darkGreen,
-            size: 23,
-          ),
+          child: const SizedBox.shrink().buildIconPlaceholder(icon),
         ),
         const SizedBox(width: 14),
         Expanded(
@@ -110,6 +154,16 @@ class StoreInfoCard extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+extension on SizedBox {
+  Widget buildIconPlaceholder(IconData icon) {
+    return Icon(
+      icon,
+      color: StoreInfoCard.darkGreen,
+      size: 23,
     );
   }
 }

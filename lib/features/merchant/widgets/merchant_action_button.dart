@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+
 class MerchantActionButton extends StatelessWidget {
   const MerchantActionButton({super.key});
 
@@ -29,7 +30,7 @@ class MerchantActionButton extends StatelessWidget {
               ),
             ),
             onPressed: () {
-              Navigator.pushNamed(context, '/merchant-scan-qr');
+              Navigator.pushNamed(context,'/merchant-scan',);
             },
           ),
         ),
