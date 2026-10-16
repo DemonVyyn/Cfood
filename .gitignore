@@ -1,4 +1,5 @@
-@'
+
+# Flutter dan Dart
 .dart_tool/
 .packages
 .pub-cache/
@@ -7,16 +8,15 @@ build/
 .flutter-plugins
 .flutter-plugins-dependencies
 
-# IDE
+# IDE dan editor
 .idea/
 .vscode/
 
-# OS
+# Sistem operasi
 .DS_Store
 Thumbs.db
 
-# Environment and secrets
+# Environment dan konfigurasi rahasia
 .env
 .env.*
 !.env.example
-'@ | Add-Content .gitignore
