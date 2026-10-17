@@ -43,7 +43,7 @@ Thumbs.db
 # Folder duplikat dan file log
 /mobile/backend/
 /mobile/mobile/
-/mobile/flutter_*.log
+*.log
 
 # File rahasia Laravel
 /backend/.env
