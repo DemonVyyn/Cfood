@@ -91,13 +91,10 @@ class MerchantController extends Controller
         'mitra_id',
         $mitra->id
     )
-    ->orderByRaw("
-        CASE
-            WHEN waktu_expired <= NOW()
-            THEN 0
-            ELSE 1
-        END
-    ")
+    ->orderByRaw(
+        'CASE WHEN waktu_expired <= ? THEN 0 ELSE 1 END',
+        [now()->toDateTimeString()]
+    )
     ->orderBy(
         'waktu_expired',
         'asc'
@@ -184,13 +181,10 @@ class MerchantController extends Controller
         'mitra_id',
         $mitra->id
     )
-    ->orderByRaw("
-        CASE
-            WHEN waktu_expired <= NOW()
-            THEN 0
-            ELSE 1
-        END
-    ")
+    ->orderByRaw(
+        'CASE WHEN waktu_expired <= ? THEN 0 ELSE 1 END',
+        [now()->toDateTimeString()]
+    )
     ->orderBy(
         'waktu_expired',
         'asc'

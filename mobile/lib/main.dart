@@ -18,8 +18,6 @@ import 'features/customer/notification/notification_page.dart';
 
 import 'features/pickup/pickup_qr_page.dart';
 
-import 'features/merchant/merchant_dashboard_page.dart';
-
 import 'features/merchant/products/product_list_page.dart';
 import 'features/merchant/products/add_product_page.dart';
 import 'features/merchant/products/edit_product_page.dart';
@@ -29,12 +27,20 @@ import 'features/merchant/store_profile/store_profile_page.dart';
 import 'features/merchant/notification/merchant_notification_page.dart';
 
 import 'widgets/home_shell.dart'; // HomeShell dengan curved bottom navigation bar
+import 'widgets/merchant_shell.dart'; // MerchantShell dengan curved navigation mitra
 
 import 'providers/merchant_provider.dart';
 import 'providers/merchant_product_provider.dart';
 import 'providers/merchant_order_provider.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Muat foto profil tersimpan sebelum app dijalankan supaya
+  // foto tetap muncul setelah logout/login atau app dibuka kembali.
+  final profilePhotoProvider = ProfilePhotoProvider();
+  await profilePhotoProvider.load();
+
   runApp(
     MultiProvider(
       providers: [
@@ -42,7 +48,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => FoodProvider()),
         ChangeNotifierProvider(create: (_) => MerchantProvider()),
         ChangeNotifierProvider(create: (_) => MerchantProductProvider()),
-        ChangeNotifierProvider(create: (_) => ProfilePhotoProvider()),
+        ChangeNotifierProvider.value(value: profilePhotoProvider),
         ChangeNotifierProvider(create: (_) => LocationProvider()),
         ChangeNotifierProvider(create: (_) => MerchantOrderProvider()),
       ],
@@ -81,7 +87,7 @@ class MyApp extends StatelessWidget {
 
         '/pickup': (_) => const PickupQrPage(),
 
-        '/merchant': (_) => const MerchantDashboardPage(),
+        '/merchant': (_) => const MerchantShell(),
 
         '/merchant-products': (_) => const ProductListPage(),
 

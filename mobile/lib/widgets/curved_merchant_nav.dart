@@ -7,8 +7,11 @@ class CurvedMerchantNav extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int>? onTap;
 
-  const CurvedMerchantNav({Key? key, required this.currentIndex, this.onTap})
-    : super(key: key);
+  const CurvedMerchantNav({
+    super.key,
+    required this.currentIndex,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {

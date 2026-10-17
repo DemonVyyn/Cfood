@@ -77,34 +77,34 @@ class UserSeeder extends Seeder
             ]
         );
 
-        $mitra1 = User::firstOrCreate(
+        $mitra1 = User::updateOrCreate(
             ['email' => 'bakery@gmail.com'],
             [
                 'nama' => 'Bakery Bahagia',
                 'phone' => '084444444444',
-                'password' => Hash::make('password'),
+                'password' => Hash::make('bakery123'),
                 'role' => 'mitra',
                 'status' => 'active',
             ]
         );
 
-        $mitra2 = User::firstOrCreate(
+        $mitra2 = User::updateOrCreate(
             ['email' => 'coffee@gmail.com'],
             [
                 'nama' => 'Coffee Corner',
                 'phone' => '085555555555',
-                'password' => Hash::make('password'),
+                'password' => Hash::make('coffee123'),
                 'role' => 'mitra',
                 'status' => 'active',
             ]
         );
 
-        $mitra3 = User::firstOrCreate(
+        $mitra3 = User::updateOrCreate(
             ['email' => 'hotel@gmail.com'],
             [
                 'nama' => 'Hotel Harmoni',
                 'phone' => '086666666666',
-                'password' => Hash::make('password'),
+                'password' => Hash::make('hotel123'),
                 'role' => 'mitra',
                 'status' => 'active',
             ]

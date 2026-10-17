@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'widgets/order_history_card.dart';
 
-import '../../../widgets/curved_bottom_nav.dart';
-
 class OrderHistoryPage extends StatelessWidget {
   const OrderHistoryPage({super.key});
 
@@ -23,11 +21,6 @@ class OrderHistoryPage extends StatelessWidget {
             status: "Selesai",
           ),
         ],
-      ),
-      // Bottom navigation is now handled by HomeShell (SPA).
-       bottomNavigationBar:
-          const CurvedBottomNav(
-        currentIndex: 0,
       ),
     );
   }

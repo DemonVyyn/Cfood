@@ -2,7 +2,6 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../../../providers/profile_photo_provider.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -154,11 +153,9 @@ class ProfileHeader extends StatelessWidget {
     );
   }
 
-  /// Tampilan avatar: foto terpilih (jika ada) atau foto default.
-  Widget _buildAvatar(XFile? photo) {
-    final picked = photo;
-
-    if (picked == null) {
+  /// Tampilan avatar: foto tersimpan (jika ada) atau foto default.
+  Widget _buildAvatar(Uint8List? photo) {
+    if (photo == null) {
       // Foto default (Unsplash: mengirim header CORS, aman di web)
       return Image.network(
         'https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=150&h=150&fit=crop&crop=faces',
@@ -174,28 +171,9 @@ class ProfileHeader extends StatelessWidget {
       );
     }
 
-    // readAsBytes + Image.memory bekerja di web & mobile
-    // (tanpa perlu dart:io yang tidak tersedia di web).
-    return FutureBuilder<Uint8List>(
-      future: picked.readAsBytes(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done &&
-            snapshot.hasData) {
-          return Image.memory(
-            snapshot.data!,
-            fit: BoxFit.cover,
-          );
-        }
-        return Container(
-          color: AppColors.surfaceContainerHigh,
-          child: const Center(
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: AppColors.primary,
-            ),
-          ),
-        );
-      },
+    return Image.memory(
+      photo,
+      fit: BoxFit.cover,
     );
   }
 }

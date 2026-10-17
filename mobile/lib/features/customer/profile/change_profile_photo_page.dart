@@ -9,8 +9,8 @@ import '../../../../core/theme/app_colors.dart';
 /// Halaman ganti foto profil: pilih dari galeri / kamera,
 /// lihat preview, lalu simpan.
 class ChangeProfilePhotoPage extends StatefulWidget {
-  /// Foto yang sedang dipakai (kalau ada).
-  final XFile? currentPhoto;
+  /// Foto yang sedang dipakai (kalau ada) — bytes tersimpan.
+  final Uint8List? currentPhoto;
 
   const ChangeProfilePhotoPage({
     super.key,
@@ -307,47 +307,59 @@ class _ChangeProfilePhotoPageState
   // ---------- PREVIEW ----------
 
   Widget _buildPreview() {
-    final picked = _picked ?? widget.currentPhoto;
-
-    if (picked == null) {
-      // Belum ada foto: tampilkan foto default (Unsplash, aman CORS)
-      return Image.network(
-        'https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=300&h=300&fit=crop&crop=faces',
-        fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => Container(
-          color: AppColors.surfaceContainerHigh,
-          child: const Icon(
-            Icons.person,
-            size: 64,
-            color: AppColors.onSurfaceVariant,
-          ),
-        ),
+    // Foto baru yang dipilih dari galeri/kamera (belum disimpan).
+    if (_picked != null) {
+      // readAsBytes + Image.memory bekerja di web & mobile
+      // (tanpa perlu dart:io yang tidak tersedia di web).
+      return FutureBuilder<Uint8List>(
+        future: _picked!.readAsBytes(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState ==
+                  ConnectionState.done &&
+              snapshot.hasData) {
+            return Image.memory(
+              snapshot.data!,
+              fit: BoxFit.cover,
+            );
+          }
+          return _buildLoadingPreview();
+        },
       );
     }
 
-    // readAsBytes + Image.memory bekerja di web & mobile
-    // (tanpa perlu dart:io yang tidak tersedia di web).
-    return FutureBuilder<Uint8List>(
-      future: picked.readAsBytes(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState ==
-                ConnectionState.done &&
-            snapshot.hasData) {
-          return Image.memory(
-            snapshot.data!,
-            fit: BoxFit.cover,
-          );
-        }
-        return Container(
-          color: AppColors.surfaceContainerHigh,
-          child: const Center(
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: AppColors.primary,
-            ),
-          ),
-        );
-      },
+    // Foto yang sudah tersimpan sebelumnya.
+    final current = widget.currentPhoto;
+    if (current != null) {
+      return Image.memory(
+        current,
+        fit: BoxFit.cover,
+      );
+    }
+
+    // Belum ada foto: tampilkan foto default (Unsplash, aman CORS)
+    return Image.network(
+      'https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=300&h=300&fit=crop&crop=faces',
+      fit: BoxFit.cover,
+      errorBuilder: (_, _, _) => Container(
+        color: AppColors.surfaceContainerHigh,
+        child: const Icon(
+          Icons.person,
+          size: 64,
+          color: AppColors.onSurfaceVariant,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingPreview() {
+    return Container(
+      color: AppColors.surfaceContainerHigh,
+      child: const Center(
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          color: AppColors.primary,
+        ),
+      ),
     );
   }
 

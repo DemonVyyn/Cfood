@@ -37,7 +37,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
 
     if (result is XFile) {
-      photoProvider.setPhoto(result);
+      await photoProvider.setPhoto(result);
     }
   }
 

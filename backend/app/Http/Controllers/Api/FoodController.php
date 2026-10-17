@@ -17,13 +17,10 @@ class FoodController extends Controller
         ->where('status', 'aktif')
         ->where('stok', '>', 0)
 
-        ->orderByRaw("
-            CASE
-                WHEN waktu_expired <= NOW()
-                THEN 0
-                ELSE 1
-            END
-        ")
+        ->orderByRaw(
+            'CASE WHEN waktu_expired <= ? THEN 0 ELSE 1 END',
+            [now()->toDateTimeString()]
+        )
 
         ->orderBy(
             'waktu_expired',

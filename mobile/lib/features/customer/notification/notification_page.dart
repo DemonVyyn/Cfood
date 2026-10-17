@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'widgets/notification_card.dart';
-import '../../../widgets/curved_bottom_nav.dart';
 
 
 
@@ -29,11 +28,6 @@ class NotificationPage extends StatelessWidget {
             time: "1 jam lalu",
           ),
         ],
-      ),
-      // Bottom navigation is now handled by HomeShell (SPA).
-       bottomNavigationBar:
-          const CurvedBottomNav(
-        currentIndex: 0,
       ),
     );
   }

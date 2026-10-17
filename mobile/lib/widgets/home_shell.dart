@@ -1,6 +1,6 @@
 // lib/widgets/home_shell.dart
 import 'package:flutter/material.dart';
-import '../features/customer/home/home_page.dart';
+import '../features/home/home_page.dart';
 import '../features/customer/order_history/order_history_page.dart';
 import '../features/customer/notification/notification_page.dart';
 import '../features/customer/profile/profile_page.dart';

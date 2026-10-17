@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 import 'package:provider/provider.dart';
 import '../../../providers/profile_photo_provider.dart';
-import 'package:image_picker/image_picker.dart';
 
 
 import 'package:flutter/material.dart';
@@ -169,8 +168,8 @@ class HomeHeader extends StatelessWidget {
       ),
     );
   }
-    /// Avatar home: foto pilihan user (kalau ada) atau foto default.
-  Widget _buildHomeAvatar(XFile? photo) {
+    /// Avatar home: foto tersimpan (kalau ada) atau foto default.
+  Widget _buildHomeAvatar(Uint8List? photo) {
     if (photo == null) {
       return const CircleAvatar(
         backgroundColor: AppColors.surfaceContainerHigh,
@@ -179,21 +178,10 @@ class HomeHeader extends StatelessWidget {
         ),
       );
     }
-    // readAsBytes + MemoryImage bekerja di web & Android.
-    return FutureBuilder<Uint8List>(
-      future: photo.readAsBytes(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done &&
-            snapshot.hasData) {
-          return CircleAvatar(
-            backgroundColor: AppColors.surfaceContainerHigh,
-            backgroundImage: MemoryImage(snapshot.data!),
-          );
-        }
-        return const CircleAvatar(
-          backgroundColor: AppColors.surfaceContainerHigh,
-        );
-      },
+    // Bytes tersimpan langsung dipakai (aman di web & Android).
+    return CircleAvatar(
+      backgroundColor: AppColors.surfaceContainerHigh,
+      backgroundImage: MemoryImage(photo),
     );
   }
 }

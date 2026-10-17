@@ -23,4 +23,33 @@ class StorageService {
       key: 'token',
     );
   }
+
+  // ---------- FOTO PROFIL ----------
+
+  static const _profilePhotoKey =
+      'profile_photo_base64';
+
+  /// Simpan foto profil dalam format base64 (string).
+  static Future<void> saveProfilePhotoBase64(
+    String value,
+  ) async {
+    await _storage.write(
+      key: _profilePhotoKey,
+      value: value,
+    );
+  }
+
+  /// Ambil foto profil tersimpan (base64), null kalau belum ada.
+  static Future<String?> getProfilePhotoBase64() async {
+    return await _storage.read(
+      key: _profilePhotoKey,
+    );
+  }
+
+  /// Hapus foto profil tersimpan.
+  static Future<void> clearProfilePhotoBase64() async {
+    await _storage.delete(
+      key: _profilePhotoKey,
+    );
+  }
 }
