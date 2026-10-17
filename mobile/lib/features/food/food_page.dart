@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../providers/food_provider.dart';
 import '../../models/food_model.dart';
+import '../../data/dummy_foods.dart';
 import 'food_detail_page.dart';
 import '../../widgets/curved_bottom_nav.dart';
 
@@ -96,7 +97,7 @@ class _FoodPageState
                         MaterialPageRoute(
                           builder: (_) =>
                               FoodDetailPage(
-                            food: food,
+                            food: food.toDummyFood(),
                           ),
                         ),
                       );

@@ -1,124 +1,322 @@
 import 'package:flutter/material.dart';
-
-import 'widgets/profile_header.dart';
-import 'widgets/profile_menu_item.dart';
-import 'widgets/profile_stat_card.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import '../../../providers/auth_provider.dart';
-import '../../../widgets/curved_bottom_nav.dart';
 
-class ProfilePage extends StatelessWidget {
+import '../../../core/theme/app_colors.dart';
+import '../../../providers/auth_provider.dart';
+import '../../../providers/profile_photo_provider.dart';
+import '../../customer/order_history/order_history_page.dart';
+import 'change_profile_photo_page.dart';
+import 'edit_profile_page.dart';
+import 'widgets/profile_header.dart';
+import 'widgets/profile_menu_group.dart';
+
+/// Halaman "Profil Saya" (desain Stitch: Mealio Eco Surplus).
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
-    final user = auth.user;
-    
-    return Scaffold(
-      appBar: AppBar(title: const Text("Profil")),
-      
+  State<ProfilePage> createState() =>
+      _ProfilePageState();
+}
 
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          ProfileHeader(
-          name: user?.nama ?? 'Pengguna',
-          email: user?.email ?? '-',
+class _ProfilePageState extends State<ProfilePage> {
+  /// Buka halaman ganti foto profil (hasilnya disimpan di
+  /// ProfilePhotoProvider supaya avatar di home ikut berubah).
+  Future<void> _changePhoto() async {
+    final photoProvider = context.read<ProfilePhotoProvider>();
+
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ChangeProfilePhotoPage(
+          currentPhoto: photoProvider.photo,
         ),
+      ),
+    );
 
-          const SizedBox(height: 20),
+    if (result is XFile) {
+      photoProvider.setPhoto(result);
+    }
+  }
 
-          Row(
-            children: const [
-              Expanded(
-                child: ProfileStatCard(
-                  title: 'Pesanan',
-                  value: '24',
-                  icon: Icons.receipt_long,
-                  color: Colors.green,
-                ),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.surface,
+
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header: judul + aksi edit & pengaturan
+            Container(
+              color: AppColors.surface,
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Profil Saya',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 22,
+                      height: 28 / 22,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: -0.3,
+                      color: AppColors.onSurface,
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      _headerAction(
+                        icon: Icons.edit,
+                        tooltip: 'Edit Profil',
+                        onTap: () => _openEditProfile(context),
+                      ),
+                      const SizedBox(width: 4),
+                      _headerAction(
+                        icon: Icons.settings,
+                        tooltip: 'Pengaturan',
+                        onTap: () => _showComingSoon(
+                          context,
+                          'Pengaturan',
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
+            ),
 
-              SizedBox(width: 12),
+            // Konten scrollable
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                children: [
+                  // 1. Ringkasan profil (ketuk foto → ganti foto profil)
+                  ProfileHeader(
+                    onTap: _changePhoto,
+                  ),
 
-              Expanded(
-                child: ProfileStatCard(
-                  title: 'Food Saved',
-                  value: '18',
-                  icon: Icons.eco,
-                  color: Colors.orange,
-                ),
+                  const SizedBox(height: 16),
+
+                  // 2. Akun & Keamanan
+                  ProfileMenuGroup(
+                    title: 'Akun & Keamanan',
+                    items: [
+                      ProfileMenuGroupItem(
+                        icon: Icons.person,
+                        title: 'Edit Profil',
+                        subtitle: 'Nama, email, no HP',
+                        onTap: () =>
+                            _openEditProfile(context),
+                      ),
+                      ProfileMenuGroupItem(
+                        icon: Icons.lock,
+                        title: 'Keamanan Akun',
+                        subtitle: 'Ubah Kata Sandi',
+                        onTap: () => _showComingSoon(
+                          context,
+                          'Keamanan Akun',
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // 3. Preferensi & Aktivitas
+                  ProfileMenuGroup(
+                    title: 'Preferensi & Aktivitas',
+                    items: [
+                      ProfileMenuGroupItem(
+                        icon: Icons.receipt_long,
+                        title: 'Pesanan Saya',
+                        subtitle: 'Riwayat & Pesanan Berjalan',
+                        onTap: () => _openOrders(context),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // 4. Bantuan & Informasi
+                  ProfileMenuGroup(
+                    title: 'Bantuan & Informasi',
+                    items: const [
+                      ProfileMenuGroupItem(
+                        icon: Icons.support_agent,
+                        iconColor: AppColors.onSurfaceVariant,
+                        title: 'Pusat Bantuan & Layanan Pelanggan',
+                      ),
+                      ProfileMenuGroupItem(
+                        icon: Icons.info,
+                        iconColor: AppColors.onSurfaceVariant,
+                        title: 'Tentang CFood',
+                      ),
+                      ProfileMenuGroupItem(
+                        icon: Icons.policy,
+                        iconColor: AppColors.onSurfaceVariant,
+                        title: 'Syarat Ketentuan & Kebijakan Privasi',
+                      ),
+                      ProfileMenuGroupItem(
+                        icon: Icons.star,
+                        iconColor: AppColors.onSurfaceVariant,
+                        title: 'Beri Nilai Aplikasi di Play Store',
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // 5. Tombol keluar + versi aplikasi
+                  _buildLogoutButton(context),
+
+                  const SizedBox(height: 12),
+
+                  Text(
+                    'CFood App v1.0',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      height: 16 / 11,
+                      color: AppColors.outline,
+                    ),
+                  ),
+                ],
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-              SizedBox(width: 12),
+  // ---------- AKSI HEADER ----------
 
-              Expanded(
-                child: ProfileStatCard(
-                  title: 'Review',
-                  value: '12',
-                  icon: Icons.star,
-                  color: Colors.amber,
-                ),
-              ),
-            ],
+  Widget _headerAction({
+    required IconData icon,
+    required String tooltip,
+    required VoidCallback onTap,
+  }) {
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(999),
+        child: Container(
+          width: 40,
+          height: 40,
+          decoration: const BoxDecoration(shape: BoxShape.circle),
+          child: Icon(
+            icon,
+            size: 22,
+            color: AppColors.onSurfaceVariant,
           ),
+        ),
+      ),
+    );
+  }
 
-          const SizedBox(height: 24),
+  // ---------- TOMBOL KELUAR ----------
 
-          const ProfileMenuItem(
-            icon: Icons.person_outline,
-            title: "Edit Profil",
+  Widget _buildLogoutButton(BuildContext context) {
+    return OutlinedButton(
+      onPressed: () => _confirmLogout(context),
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size.fromHeight(48),
+        side: BorderSide(
+          color: AppColors.error.withValues(alpha: 0.30),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.logout,
+            size: 18,
+            color: AppColors.error,
           ),
-
-          const ProfileMenuItem(icon: Icons.history, title: "Riwayat Pesanan"),
-
-          const ProfileMenuItem(
-            icon: Icons.notifications_none,
-            title: "Notifikasi",
+          const SizedBox(width: 8),
+          Text(
+            'Keluar dari Akun',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 12,
+              height: 16 / 12,
+              fontWeight: FontWeight.w600,
+              color: AppColors.error,
+            ),
           ),
+        ],
+      ),
+    );
+  }
 
-          const ProfileMenuItem(
-            icon: Icons.help_outline,
-            title: "Pusat Bantuan",
-          ),
+  Future<void> _confirmLogout(
+      BuildContext context) async {
+    // Ambil provider SEBELUM async gap agar tidak pakai context
+    // setelah await (aman dari lint use_build_context_synchronously).
+    final auth = context.read<AuthProvider>();
 
-          const ProfileMenuItem(
-            icon: Icons.settings_outlined,
-            title: "Pengaturan",
-          ),
-
-         ProfileMenuItem(
-  icon: Icons.logout,
-  title: "Logout",
-  onTap: () async {
-    final confirm = await showDialog<bool>(
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Logout'),
-          content: const Text(
-            'Apakah Anda yakin ingin keluar?',
+          backgroundColor: AppColors.surfaceContainerLowest,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            'Keluar dari Akun',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 18,
+              height: 24 / 18,
+              fontWeight: FontWeight.w700,
+              color: AppColors.onSurface,
+            ),
+          ),
+          content: Text(
+            'Apakah Anda yakin ingin keluar dari akun CFood?',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 14,
+              height: 20 / 14,
+              color: AppColors.onSurfaceVariant,
+            ),
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.pop(dialogContext, false);
-              },
-              child: const Text('Batal'),
+              onPressed: () =>
+                  Navigator.pop(dialogContext, false),
+              child: Text(
+                'Batal',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.onSurfaceVariant,
+                ),
+              ),
             ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(dialogContext, true);
-              },
-              child: const Text('Logout'),
+            TextButton(
+              onPressed: () =>
+                  Navigator.pop(dialogContext, true),
+              child: Text(
+                'Keluar',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.error,
+                ),
+              ),
             ),
           ],
         );
       },
     );
 
-    if (confirm != true) return;
+    if (confirmed != true) return;
 
     await auth.logout();
 
@@ -129,14 +327,44 @@ class ProfilePage extends StatelessWidget {
       '/login',
       (route) => false,
     );
-  },
-),
-        ],
+  }
+
+  // ---------- NAVIGASI ----------
+
+  void _openEditProfile(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const EditProfilePage(),
       ),
-      // Bottom navigation is now handled by HomeShell (SPA).
-      bottomNavigationBar: const CurvedBottomNav(
-  currentIndex: 0,
-),
+    );
+  }
+
+  void _openOrders(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const OrderHistoryPage(),
+      ),
+    );
+  }
+
+  void _showComingSoon(
+    BuildContext context,
+    String feature,
+  ) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          '$feature — segera hadir',
+          style: GoogleFonts.plusJakartaSans(),
+        ),
+        backgroundColor: AppColors.inverseSurface,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
     );
   }
 }

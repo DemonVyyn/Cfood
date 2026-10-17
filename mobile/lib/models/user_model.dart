@@ -15,10 +15,10 @@ class UserModel {
     Map<String, dynamic> json,
   ) {
     return UserModel(
-      id: json['id'],
-      nama: json['nama'],
-      email: json['email'],
-      role: json['role'],
+      id: json['id'] ?? 0,
+      nama: json['nama'] ?? '',
+      email: json['email'] ?? '',
+      role: json['role'] ?? '',
     );
   }
 }

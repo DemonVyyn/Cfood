@@ -65,7 +65,12 @@ class FoodModel {
               ) ??
               0,
 
-      stok: json['stok'] ?? 0,
+      stok:
+          int.tryParse(
+                json['stok']?.toString() ??
+                    '0',
+              ) ??
+              0,
 
       kategori:
           json['kategori'] ??

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../models/food_model.dart';
+import '../../../../data/dummy_foods.dart';
 import '../../../food/food_detail_page.dart';
 
 class SurplusFoodCard extends StatelessWidget {
@@ -34,7 +35,7 @@ class SurplusFoodCard extends StatelessWidget {
           MaterialPageRoute(
             builder: (_) =>
                 FoodDetailPage(
-              food: food,
+              food: food.toDummyFood(),
             ),
           ),
         );
