@@ -20,3 +20,25 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+
+# Laravel dependencies and generated files
+/backend/vendor/
+/backend/node_modules/
+/backend/.env
+/backend/storage/*.key
+/backend/storage/logs/
+/backend/bootstrap/cache/
+
+# Flutter generated files
+/mobile/.dart_tool/
+/mobile/build/
+/mobile/.flutter-plugins
+/mobile/.flutter-plugins-dependencies
+/mobile/.packages
+/mobile/.pub-cache/
+/mobile/coverage/
+/mobile/.git-backup/
+/mobile/mobile/
+
+# IDE files
+/mobile/.idea/
