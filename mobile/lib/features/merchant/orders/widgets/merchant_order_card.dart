@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 
 class MerchantOrderCard extends StatelessWidget {
@@ -17,6 +18,10 @@ class MerchantOrderCard extends StatelessWidget {
     required this.status,
     required this.totalPrice,
   });
+
+  static const Color primaryGreen = Color(0xFF14DE32);
+  static const Color darkGreen = Color(0xFF0CB52A);
+  static const Color textColor = Color(0xFF263126);
 
   Color _statusColor() {
     switch (status.toLowerCase()) {
@@ -39,171 +44,198 @@ class MerchantOrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final statusColor = _statusColor();
+
     return Container(
-      margin: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 8,
-      ),
+      margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius:
-            BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: Colors.grey.shade100,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.shade200,
-            blurRadius: 10,
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 12,
             offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ID pesanan dan status
           Row(
             children: [
               Expanded(
                 child: Text(
                   orderId,
                   style: const TextStyle(
-                    fontWeight:
-                        FontWeight.bold,
                     fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
                   ),
                 ),
               ),
-
               Container(
-                padding:
-                    const EdgeInsets.symmetric(
+                padding: const EdgeInsets.symmetric(
                   horizontal: 10,
-                  vertical: 5,
+                  vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color:
-                      _statusColor()
-                          .withValues(alpha: 0.15),
-                  borderRadius:
-                      BorderRadius.circular(
-                    20,
-                  ),
+                  color: statusColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   status,
                   style: TextStyle(
-                    color:
-                        _statusColor(),
-                    fontWeight:
-                        FontWeight.bold,
-                    fontSize: 12,
+                    color: statusColor,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
             ],
+          ),
+
+          const SizedBox(height: 16),
+
+          // Nama pelanggan
+          _buildInfoRow(
+            icon: Icons.person_outline,
+            label: 'Pelanggan',
+            value: customerName,
           ),
 
           const SizedBox(height: 12),
 
-          Row(
-            children: [
-              const Icon(
-                Icons.person,
-                size: 18,
-                color: Colors.grey,
-              ),
-
-              const SizedBox(width: 8),
-
-              Expanded(
-                child: Text(
-                  customerName,
-                ),
-              ),
-            ],
+          // Nama produk
+          _buildInfoRow(
+            icon: Icons.fastfood_outlined,
+            label: 'Produk',
+            value: productName,
           ),
 
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
 
-          Row(
-            children: [
-              const Icon(
-                Icons.fastfood,
-                size: 18,
-                color: Colors.grey,
-              ),
-
-              const SizedBox(width: 8),
-
-              Expanded(
-                child: Text(
-                  productName,
-                ),
-              ),
-            ],
+          // Waktu pengambilan
+          _buildInfoRow(
+            icon: Icons.schedule_outlined,
+            label: 'Waktu Pengambilan',
+            value: pickupTime,
           ),
 
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
 
-          Row(
-            children: [
-              const Icon(
-                Icons.schedule,
-                size: 18,
-                color: Colors.grey,
-              ),
-
-              const SizedBox(width: 8),
-
-              Text(
-                pickupTime,
-              ),
-            ],
+          Divider(
+            height: 1,
+            color: Colors.grey.shade200,
           ),
 
-          const Divider(
-            height: 24,
-          ),
+          const SizedBox(height: 14),
 
+          // Total harga dan tombol verifikasi
           Row(
             children: [
               Expanded(
-                child: Text(
-                  'Rp ${totalPrice.toString()}',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight:
-                        FontWeight.bold,
-                    color: Color(
-                      0xFF1B5E20,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Total Pesanan',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Rp ${totalPrice.toString()}',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: darkGreen,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-
+              const SizedBox(width: 8),
               ElevatedButton.icon(
-                onPressed: () {},
-                style:
-                    ElevatedButton.styleFrom(
-                  backgroundColor:
-                      const Color(
-                    0xFF1B5E20,
+                onPressed: () {
+                  // Aksi verifikasi QR belum dihubungkan pada kode asli.
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: darkGreen,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 12,
                   ),
-                  foregroundColor:
-                      Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 icon: const Icon(
                   Icons.qr_code_scanner,
                   size: 18,
                 ),
                 label: const Text(
-                  "Verifikasi",
+                  'Verifikasi',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
                 ),
               ),
             ],
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildInfoRow({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          icon,
+          size: 20,
+          color: darkGreen,
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: textColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

@@ -6,6 +6,7 @@ import 'widgets/pickup_schedule_card.dart';
 import 'widgets/merchant_location_card.dart';
 import 'widgets/order_detail_card.dart';
 import 'widgets/pickup_instruction_card.dart';
+import '../../../widgets/curved_bottom_nav.dart';
 
 class PickupQrPage extends StatelessWidget {
   const PickupQrPage({super.key});
@@ -42,6 +43,10 @@ class PickupQrPage extends StatelessWidget {
           ],
         ),
       ),
+      bottomNavigationBar:
+          const CurvedBottomNav(
+        currentIndex: 0,
+      )
     );
   }
 }

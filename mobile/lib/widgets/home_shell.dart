@@ -1,6 +1,6 @@
 // lib/widgets/home_shell.dart
 import 'package:flutter/material.dart';
-import '../features/home/home_page.dart';
+import '../features/customer/home/home_page.dart';
 import '../features/customer/order_history/order_history_page.dart';
 import '../features/customer/notification/notification_page.dart';
 import '../features/customer/profile/profile_page.dart';
@@ -12,7 +12,9 @@ import 'curved_bottom_nav.dart';
 /// user taps the navigation bar, while the navigation bar itself stays
 /// in place and its animation remains smooth – mimicking a SPA.
 class HomeShell extends StatefulWidget {
-  const HomeShell({Key? key}) : super(key: key);
+  const HomeShell({
+  super.key,
+});
 
   @override
   State<HomeShell> createState() => _HomeShellState();

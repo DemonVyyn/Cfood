@@ -11,20 +11,32 @@ class FoodController extends Controller
     /**
      * GET /api/foods
      */
-    public function index()
-    {
-        $foods = Menu::with('mitra')
-            ->where('status', 'aktif')
-            ->where('stok', '>', 0)
-            ->where('waktu_expired', '>', now())
-            ->latest()
-            ->get();
+   public function index()
+{
+    $foods = Menu::with('mitra')
+        ->where('status', 'aktif')
+        ->where('stok', '>', 0)
 
-        return response()->json([
-            'success' => true,
-            'data' => $foods,
-        ]);
-    }
+        ->orderByRaw("
+            CASE
+                WHEN waktu_expired <= NOW()
+                THEN 0
+                ELSE 1
+            END
+        ")
+
+        ->orderBy(
+            'waktu_expired',
+            'asc'
+        )
+
+        ->get();
+
+    return response()->json([
+        'success' => true,
+        'data' => $foods,
+    ]);
+}
 
     /**
      * GET /api/foods/{id}

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'widgets/notification_card.dart';
+import '../../../widgets/curved_bottom_nav.dart';
+
+
 
 class NotificationPage extends StatelessWidget {
   const NotificationPage({super.key});
@@ -28,6 +31,10 @@ class NotificationPage extends StatelessWidget {
         ],
       ),
       // Bottom navigation is now handled by HomeShell (SPA).
+       bottomNavigationBar:
+          const CurvedBottomNav(
+        currentIndex: 0,
+      ),
     );
   }
 }

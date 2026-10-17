@@ -1,85 +1,57 @@
 import 'package:flutter/material.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 
-class MerchantBottomNav
-    extends StatelessWidget {
+class MerchantBottomNav extends StatelessWidget {
   final int currentIndex;
+  final ValueChanged<int> onTap;
 
   const MerchantBottomNav({
     super.key,
     required this.currentIndex,
+    required this.onTap,
   });
 
-  void _navigate(
-    BuildContext context,
-    int index,
+  Widget _buildItem(
+    IconData icon,
+    String label,
   ) {
-    if (index == currentIndex) return;
-
-    switch (index) {
-      case 0:
-        Navigator.pushReplacementNamed(
-          context,
-          '/merchant',
-        );
-        break;
-
-      case 1:
-        Navigator.pushReplacementNamed(
-          context,
-          '/merchant-products',
-        );
-        break;
-
-      case 2:
-        Navigator.pushReplacementNamed(
-          context,
-          '/merchant-orders',
-        );
-        break;
-
-      case 3:
-        Navigator.pushReplacementNamed(
-          context,
-          '/merchant-store',
-        );
-        break;
-    }
+    return SizedBox(
+      width: 65,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 24),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: currentIndex,
-
-      type: BottomNavigationBarType.fixed,
-
-      selectedItemColor:
-          const Color(0xFF166534),
-
-      onTap: (index) =>
-          _navigate(
-            context,
-            index,
-          ),
-
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.dashboard),
-          label: 'Dashboard',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.fastfood),
-          label: 'Produk',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.receipt),
-          label: 'Pesanan',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.store),
-          label: 'Toko',
-        ),
+    return CurvedNavigationBar(
+      index: currentIndex,
+      height: 65,
+      backgroundColor: Colors.transparent,
+      color: const Color(0xFF14DE32),
+      buttonBackgroundColor: const Color(0xFF3DE23D),
+      animationDuration: const Duration(milliseconds: 350),
+      animationCurve: Curves.easeInOutCubic,
+      items: [
+        _buildItem(Icons.dashboard, 'Dashboard'),
+        _buildItem(Icons.fastfood, 'Produk'),
+        _buildItem(Icons.receipt_long, 'Pesanan'),
+        _buildItem(Icons.store, 'Toko'),
       ],
+      onTap: onTap,
     );
   }
 }

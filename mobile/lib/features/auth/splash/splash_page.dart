@@ -8,60 +8,72 @@ class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
 
   @override
-  State<SplashPage> createState() =>
-      _SplashPageState();
+  State<SplashPage> createState() => _SplashPageState();
 }
 
-class _SplashPageState
-    extends State<SplashPage> {
+class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
 
-    initializeApp();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      initializeApp();
+    });
   }
 
   Future<void> initializeApp() async {
-  await context
-      .read<LocationProvider>()
-      .startTracking();
+    final locationProvider =
+        context.read<LocationProvider>();
 
-  final auth =
-      Provider.of<AuthProvider>(
-    context,
-    listen: false,
-  );
+    final auth =
+        context.read<AuthProvider>();
 
-  final loggedIn =
-      await auth.checkLogin();
+    try {
+      await locationProvider.startTracking();
+    } catch (_) {}
 
-  if (!mounted) return;
+    final loggedIn =
+        await auth.checkLogin();
 
-  if (loggedIn) {
-    if (auth.user?.role ==
-        'mitra') {
-      Navigator.pushReplacementNamed(
-        context,
-        '/merchant',
+    if (!mounted) return;
+
+    if (loggedIn) {
+      final role = auth.user?.role;
+
+      debugPrint(
+        'AUTO LOGIN ROLE = $role',
       );
+
+      if (role == 'mitra') {
+        Navigator.pushReplacementNamed(
+          context,
+          '/merchant',
+        );
+      } else if (role == 'admin') {
+        Navigator.pushReplacementNamed(
+          context,
+          '/admin',
+        );
+      } else {
+        Navigator.pushReplacementNamed(
+          context,
+          '/home',
+        );
+      }
     } else {
       Navigator.pushReplacementNamed(
         context,
-        '/home',
+        '/login',
       );
     }
-  } else {
-    Navigator.pushReplacementNamed(
-      context,
-      '/login',
-    );
   }
-}
+
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
       body: Center(
-        child: CircularProgressIndicator(),
+        child:
+            CircularProgressIndicator(),
       ),
     );
   }

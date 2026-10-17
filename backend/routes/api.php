@@ -64,6 +64,11 @@ Route::delete(
     [MerchantController::class, 'deleteProduct']
 );
 
+Route::get(
+    '/merchant/orders',
+    [MerchantController::class, 'orders']
+);
+
         Route::post(
             '/logout',
             [AuthController::class, 'logout']
@@ -77,6 +82,11 @@ Route::delete(
 Route::get(
     '/foods/{id}',
     [FoodController::class, 'show']
+);
+
+Route::post(
+    '/merchant/orders/confirm-pickup',
+    [MerchantController::class, 'confirmPickup']
 );
     });
 

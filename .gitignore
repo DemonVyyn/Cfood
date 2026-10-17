@@ -40,5 +40,13 @@ Thumbs.db
 /mobile/.git-backup/
 /mobile/mobile/
 
+# Folder duplikat dan file log
+/mobile/backend/
+/mobile/mobile/
+/mobile/flutter_*.log
+
+# File rahasia Laravel
+/backend/.env
+
 # IDE files
 /mobile/.idea/

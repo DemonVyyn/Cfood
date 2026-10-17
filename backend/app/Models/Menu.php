@@ -10,7 +10,8 @@ class Menu extends Model
     use HasFactory;
 
     protected $appends = [
-    'expired_formatted',
+        'expired_formatted',
+        'is_expired',
     ];
 
     protected $table = 'menu';
@@ -41,13 +42,28 @@ class Menu extends Model
 
     public function barangPesanan()
     {
-        return $this->hasMany(BarangPesanan::class);
+        return $this->hasMany(
+            BarangPesanan::class
+        );
     }
 
     public function getExpiredFormattedAttribute()
-{
-    return $this->waktu_expired
-        ? $this->waktu_expired->format('d M Y')
-        : null;
-}
+    {
+        return $this->waktu_expired
+            ? $this->waktu_expired->format(
+                'd M Y'
+            )
+            : null;
+    }
+
+    public function getIsExpiredAttribute()
+    {
+        if (!$this->waktu_expired) {
+            return false;
+        }
+
+        return now()->greaterThanOrEqualTo(
+            $this->waktu_expired
+        );
+    }
 }
