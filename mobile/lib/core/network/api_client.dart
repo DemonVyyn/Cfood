@@ -9,6 +9,12 @@ class ApiClient {
       headers: {
         'Accept': 'application/json',
       },
+      connectTimeout: const Duration(
+        seconds: 20,
+      ),
+      receiveTimeout: const Duration(
+        seconds: 20,
+      ),
     ),
   );
 }

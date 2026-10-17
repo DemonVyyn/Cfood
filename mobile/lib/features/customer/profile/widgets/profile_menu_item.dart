@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 
-class ProfileMenuItem
-    extends StatelessWidget {
+class ProfileMenuItem extends StatelessWidget {
   final IconData icon;
   final String title;
+  final VoidCallback? onTap;
 
   const ProfileMenuItem({
     super.key,
     required this.icon,
     required this.title,
+    this.onTap,
   });
 
   @override
@@ -16,9 +17,8 @@ class ProfileMenuItem
     return ListTile(
       leading: Icon(icon),
       title: Text(title),
-      trailing: const Icon(
-        Icons.chevron_right,
-      ),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: onTap,
     );
   }
 }

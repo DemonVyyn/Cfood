@@ -3,19 +3,29 @@ import 'package:flutter/material.dart';
 import 'widgets/profile_header.dart';
 import 'widgets/profile_menu_item.dart';
 import 'widgets/profile_stat_card.dart';
+import 'package:provider/provider.dart';
+import '../../../providers/auth_provider.dart';
+import '../../../widgets/curved_bottom_nav.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
+    final user = auth.user;
+    
     return Scaffold(
       appBar: AppBar(title: const Text("Profil")),
+      
 
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const ProfileHeader(),
+          ProfileHeader(
+          name: user?.nama ?? 'Pengguna',
+          email: user?.email ?? '-',
+        ),
 
           const SizedBox(height: 20),
 
@@ -78,10 +88,55 @@ class ProfilePage extends StatelessWidget {
             title: "Pengaturan",
           ),
 
-          const ProfileMenuItem(icon: Icons.logout, title: "Logout"),
+         ProfileMenuItem(
+  icon: Icons.logout,
+  title: "Logout",
+  onTap: () async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Logout'),
+          content: const Text(
+            'Apakah Anda yakin ingin keluar?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext, false);
+              },
+              child: const Text('Batal'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(dialogContext, true);
+              },
+              child: const Text('Logout'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm != true) return;
+
+    await auth.logout();
+
+    if (!context.mounted) return;
+
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      '/login',
+      (route) => false,
+    );
+  },
+),
         ],
       ),
       // Bottom navigation is now handled by HomeShell (SPA).
+      bottomNavigationBar: const CurvedBottomNav(
+  currentIndex: 0,
+),
     );
   }
 }

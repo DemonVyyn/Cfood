@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../widgets/curved_bottom_nav.dart';
+
 class EditProfilePage
     extends StatelessWidget {
   const EditProfilePage({
@@ -55,6 +57,10 @@ class EditProfilePage
           ],
         ),
       ),
+      bottomNavigationBar:
+          const CurvedBottomNav(
+        currentIndex: 0,
+      )
     );
   }
 }

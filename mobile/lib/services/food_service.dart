@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 import '../core/network/api_client.dart';
 import '../core/storage/storage_service.dart';
-import 'package:flutter/foundation.dart';
 
 class FoodService {
   Future<List<dynamic>> getFoods() async {
@@ -24,8 +24,13 @@ class FoodService {
       ),
     );
 
-    debugPrint('FOODS RESPONSE');
-debugPrint(response.data.toString());
+    debugPrint(
+      'FOODS RESPONSE:',
+    );
+
+    debugPrint(
+      response.data.toString(),
+    );
 
     return List<dynamic>.from(
       response.data['data'] ?? [],

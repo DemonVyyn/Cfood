@@ -10,6 +10,10 @@ class FoodModel {
   final int stok;
 
   final String namaToko;
+  final String kategori;
+
+  final bool isExpired;
+  final String expiredDate;
 
   FoodModel({
     required this.id,
@@ -20,13 +24,25 @@ class FoodModel {
     required this.hargaDiskon,
     required this.stok,
     required this.namaToko,
+    required this.kategori,
+    required this.isExpired,
+    required this.expiredDate,
   });
+
+  int get persenDiskon {
+    if (hargaOriginal <= 0) return 0;
+
+    return (((hargaOriginal - hargaDiskon) /
+                hargaOriginal) *
+            100)
+        .round();
+  }
 
   factory FoodModel.fromJson(
     Map<String, dynamic> json,
   ) {
     return FoodModel(
-      id: json['id'],
+      id: json['id'] ?? 0,
 
       nama: json['nama'] ?? '',
 
@@ -36,22 +52,36 @@ class FoodModel {
       foto: json['foto'] ?? '',
 
       hargaOriginal:
-          double.parse(
-        json['harga_original']
-            .toString(),
-      ),
+          double.tryParse(
+                json['harga_original']
+                    .toString(),
+              ) ??
+              0,
 
       hargaDiskon:
-          double.parse(
-        json['harga_diskon']
-            .toString(),
-      ),
+          double.tryParse(
+                json['harga_diskon']
+                    .toString(),
+              ) ??
+              0,
 
       stok: json['stok'] ?? 0,
+
+      kategori:
+          json['kategori'] ??
+              'Lainnya',
 
       namaToko:
           json['mitra']
                   ?['nama_toko'] ??
+              '',
+
+      isExpired:
+          json['is_expired'] ??
+              false,
+
+      expiredDate:
+          json['expired_formatted'] ??
               '',
     );
   }

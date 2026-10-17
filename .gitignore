@@ -20,3 +20,33 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+
+# Laravel dependencies and generated files
+/backend/vendor/
+/backend/node_modules/
+/backend/.env
+/backend/storage/*.key
+/backend/storage/logs/
+/backend/bootstrap/cache/
+
+# Flutter generated files
+/mobile/.dart_tool/
+/mobile/build/
+/mobile/.flutter-plugins
+/mobile/.flutter-plugins-dependencies
+/mobile/.packages
+/mobile/.pub-cache/
+/mobile/coverage/
+/mobile/.git-backup/
+/mobile/mobile/
+
+# Folder duplikat dan file log
+/mobile/backend/
+/mobile/mobile/
+/mobile/flutter_*.log
+
+# File rahasia Laravel
+/backend/.env
+
+# IDE files
+/mobile/.idea/

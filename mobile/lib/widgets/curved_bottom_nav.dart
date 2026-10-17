@@ -1,94 +1,106 @@
 // lib/widgets/curved_bottom_nav.dart
+
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 
 class CurvedBottomNav extends StatelessWidget {
   final int currentIndex;
-  final ValueChanged<int>? onTap; // optional callback
+  final ValueChanged<int>? onTap;
 
   const CurvedBottomNav({
-    Key? key,
+    super.key,
     required this.currentIndex,
     this.onTap,
-  }) : super(key: key);
+  });
+
+  void _navigate(
+    BuildContext context,
+    int index,
+  ) {
+    // Sama seperti AppBottomNav
+    if (index == currentIndex) return;
+
+    switch (index) {
+      case 0:
+        Navigator.pushReplacementNamed(
+          context,
+          '/home',
+        );
+        break;
+
+      case 1:
+        Navigator.pushReplacementNamed(
+          context,
+          '/history',
+        );
+        break;
+
+      case 2:
+        Navigator.pushReplacementNamed(
+          context,
+          '/notification',
+        );
+        break;
+
+      case 3:
+        Navigator.pushReplacementNamed(
+          context,
+          '/profile',
+        );
+        break;
+    }
+  }
+
+  Widget _buildItem(
+    IconData icon,
+    String label,
+  ) {
+    return SizedBox(
+      width: 65,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 24),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return CurvedNavigationBar(
       index: currentIndex,
-      backgroundColor: const Color.fromARGB(0, 177, 162, 162),
-      color: const Color.fromARGB(255, 20, 222, 50),
-      buttonBackgroundColor: const Color.fromARGB(255, 61, 226, 61),
+      height: 65,
+      backgroundColor: Colors.transparent,
+      color: const Color(0xFF14DE32),
+      buttonBackgroundColor: const Color(0xFF3DE23D),
       animationDuration: const Duration(milliseconds: 300),
 
-      // ---- ITEM‑ITEM DENGAN LEBAR SERAGAM ----
-      items: const [
-        // Home
-        SizedBox(
-          width: 60,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.home, size: 24),
-              SizedBox(height: 4),
-              Text('Beranda', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
-            ],
-          ),
-        ),
-        // Pesanan (History)
-        SizedBox(
-          width: 60,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.receipt_long, size: 24),
-              SizedBox(height: 4),
-              Text('Pesanan', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
-            ],
-          ),
-        ),
-        // Notifikasi
-        SizedBox(
-          width: 60,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.notifications, size: 24),
-              SizedBox(height: 4),
-              Text('Notifikasi', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
-            ],
-          ),
-        ),
-        // Profil
-        SizedBox(
-          width: 60,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.person, size: 24),
-              SizedBox(height: 4),
-              Text('Profil', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),),
-            ],
-          ),
-        ),
+      items: [
+        _buildItem(Icons.home, 'Beranda'),
+        _buildItem(Icons.receipt_long, 'Pesanan'),
+        _buildItem(Icons.notifications, 'Notifikasi'),
+        _buildItem(Icons.person, 'Profil'),
       ],
-      // -------------------------------------------------
+
       onTap: (index) {
         if (onTap != null) {
+          // Digunakan oleh HomeShell
           onTap!(index);
-        } else {
-          // fallback navigation when not used inside HomeShell
-          switch (index) {
-            case 0: Navigator.pushNamed(context, '/homeShell'); break;
-            case 1: Navigator.pushNamed(context, '/history'); break;
-            case 2: Navigator.pushNamed(context, '/notification'); break;
-            case 3: Navigator.pushNamed(context, '/profile'); break;
-          }
+          return;
         }
+
+        // Sama seperti AppBottomNav
+        _navigate(context, index);
       },
     );
   }

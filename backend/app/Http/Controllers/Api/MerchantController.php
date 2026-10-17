@@ -8,6 +8,7 @@ use App\Models\Pesanan;
 use App\Models\Pembayaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class MerchantController extends Controller
 {
@@ -86,17 +87,85 @@ class MerchantController extends Controller
                         ->take(5)
                         ->get(),
 
-                'stocks' =>
-                    Menu::where(
-                        'mitra_id',
-                        $mitra->id
-                    )
-                    ->latest()
-                    ->take(10)
-                    ->get(),
+                'stocks' => Menu::where(
+        'mitra_id',
+        $mitra->id
+    )
+    ->orderByRaw("
+        CASE
+            WHEN waktu_expired <= NOW()
+            THEN 0
+            ELSE 1
+        END
+    ")
+    ->orderBy(
+        'waktu_expired',
+        'asc'
+    )
+    ->get(),
             ]
         ]);
     }
+
+
+    //confirm pesanan
+    public function confirmPickup(Request $request)
+{
+    $validated = $request->validate([
+        'kode_pengambilan' => [
+            'required',
+            'string',
+            'max:20',
+        ],
+    ]);
+
+    $mitra = $request->user()->mitra;
+
+    if (!$mitra) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Data mitra tidak ditemukan.',
+        ], 404);
+    }
+
+    return DB::transaction(function () use ($validated, $mitra) {
+        $order = Pesanan::where('mitra_id', $mitra->id)
+            ->where(
+                'kode_pengambilan',
+                $validated['kode_pengambilan']
+            )
+            ->lockForUpdate()
+            ->first();
+
+        if (!$order) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kode QR tidak valid atau pesanan bukan milik toko ini.',
+            ], 404);
+        }
+
+        if ($order->order_status !== 'siap_diambil') {
+            return response()->json([
+                'success' => false,
+                'message' => $order->order_status === 'selesai'
+                    ? 'Pesanan ini sudah pernah diambil.'
+                    : 'Pesanan belum siap diambil atau sudah dibatalkan.',
+            ], 422);
+        }
+
+        $order->order_status = 'selesai';
+        $order->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pickup berhasil dikonfirmasi.',
+            'data' => [
+                'id' => $order->id,
+                'order_status' => $order->order_status,
+            ],
+        ]);
+    });
+}
 
     public function products(Request $request)
     {
@@ -111,12 +180,22 @@ class MerchantController extends Controller
             ], 404);
         }
 
-        $products = Menu::where(
-            'mitra_id',
-            $mitra->id
-        )
-        ->latest()
-        ->get();
+       $products = Menu::where(
+        'mitra_id',
+        $mitra->id
+    )
+    ->orderByRaw("
+        CASE
+            WHEN waktu_expired <= NOW()
+            THEN 0
+            ELSE 1
+        END
+    ")
+    ->orderBy(
+        'waktu_expired',
+        'asc'
+    )
+    ->get();
 
         return response()->json([
             'success' => true,
@@ -244,6 +323,36 @@ class MerchantController extends Controller
             'message' => 'Produk berhasil diperbarui'
         ]);
     }
+
+    public function orders(Request $request)
+{
+    $user = $request->user();
+
+    $mitra = $user->mitra;
+
+    if (!$mitra) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Data mitra tidak ditemukan'
+        ], 404);
+    }
+
+    $orders = Pesanan::with([
+        'customer',
+        'items.menu'
+    ])
+    ->where(
+        'mitra_id',
+        $mitra->id
+    )
+    ->latest()
+    ->get();
+
+    return response()->json([
+        'success' => true,
+        'data' => $orders,
+    ]);
+}
 
     public function showProduct(
     Request $request,
