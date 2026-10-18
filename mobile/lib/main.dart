@@ -7,8 +7,7 @@ import 'providers/food_provider.dart';
 import 'providers/location_provider.dart';
 import 'providers/profile_photo_provider.dart';
 
-import 'features/auth/login_page.dart';
-import 'features/auth/register_page.dart';
+import 'features/auth/auth_flow_page.dart';
 import 'features/auth/role_selection_page.dart';
 import 'features/auth/splash/splash_page.dart';
 
@@ -75,8 +74,8 @@ class MyApp extends StatelessWidget {
       ),
       routes: {
         '/role': (_) => const RoleSelectionPage(),
-        '/login': (_) => const LoginPage(),
-        '/register': (_) => const RegisterPage(),
+        '/login': (_) => const AuthFlowPage(initialIsLogin: true),
+        '/register': (_) => const AuthFlowPage(initialIsLogin: false),
 
         // HomeShell memuat bottom navigation (pola SPA).
         '/home': (_) => const HomeShell(),
