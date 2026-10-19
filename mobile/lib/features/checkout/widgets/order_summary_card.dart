@@ -1,14 +1,14 @@
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../../core/theme/app_colors.dart';
-import '../../../data/dummy_foods.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../models/food_model.dart';
 import 'checkout_card.dart';
 import 'eco_bag_toggle.dart';
 
-/// Kartu rincian pesanan (item, toggle eco, instruksi).
 class OrderSummaryCard extends StatelessWidget {
-  final DummyFood food;
+  final FoodModel food;
   final int quantity;
 
   const OrderSummaryCard({
@@ -17,39 +17,48 @@ class OrderSummaryCard extends StatelessWidget {
     this.quantity = 1,
   });
 
-  String _formatPrice(int price) =>
-      'Rp ${price.toString().replaceAllMapped(
-            RegExp(r'(\d)(?=(\d{3})+$)'),
-            (m) => '${m[1]}.',
-          )}';
+  String _formatPrice(num price) {
+    final value = price.round().toString();
+    final formatted = value.replaceAllMapped(
+      RegExp(r'\B(?=(\d{3})+(?!\d))'),
+      (match) => '.',
+    );
 
-  String _formatShortPrice(int value) {
-    if (value >= 1000) {
-      final rb = value / 1000;
+    return 'Rp $formatted';
+  }
+
+  String _formatShortPrice(num value) {
+    final amount = value.round();
+
+    if (amount >= 1000) {
+      final rb = amount / 1000;
       final text = rb == rb.roundToDouble()
           ? rb.toInt().toString()
           : rb.toStringAsFixed(1);
+
       return 'Rp ${text}rb';
     }
-    return 'Rp $value';
+
+    return _formatPrice(amount);
   }
 
   @override
   Widget build(BuildContext context) {
-    final totalNormal = food.originalPrice * quantity;
-    final totalDiskon = food.discountPrice * quantity;
+    final totalNormal = food.hargaOriginal * quantity;
+    final totalDiskon = food.hargaDiskon * quantity;
     final hemat = totalNormal - totalDiskon;
 
     return CheckoutCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header: ikon + judul + badge jumlah
           Container(
             padding: const EdgeInsets.only(bottom: 10),
             decoration: const BoxDecoration(
               border: Border(
-                bottom: BorderSide(color: AppColors.surfaceContainer),
+                bottom: BorderSide(
+                  color: AppColors.surfaceContainer,
+                ),
               ),
             ),
             child: Row(
@@ -89,19 +98,19 @@ class OrderSummaryCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                // Badge jumlah item
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.secondaryContainer
-                        .withValues(alpha: 0.4),
+                    color: AppColors.secondaryContainer.withValues(
+                      alpha: 0.4,
+                    ),
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
-                    '$quantity Item Box',
+                    '$quantity Item',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 10,
                       height: 14 / 10,
@@ -113,41 +122,29 @@ class OrderSummaryCard extends StatelessWidget {
               ],
             ),
           ),
-
           const SizedBox(height: 16),
-
-          // Item row
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Gambar produk + badge SURPLUS
               Stack(
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      food.image,
-                      width: 80,
-                      height: 80,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => Container(
-                        width: 80,
-                        height: 80,
-                        color: AppColors.surfaceContainerHigh,
-                        child: const Icon(
-                          Icons.fastfood,
-                          color: AppColors.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
+                    child: food.foto.isNotEmpty
+                        ? Image.network(
+                            food.foto,
+                            width: 80,
+                            height: 80,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, _, _) => _imagePlaceholder(),
+                          )
+                        : _imagePlaceholder(),
                   ),
                   Positioned(
                     left: 4,
                     bottom: 4,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 4,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
                       decoration: BoxDecoration(
                         color: AppColors.primary,
                         borderRadius: BorderRadius.circular(4),
@@ -165,17 +162,14 @@ class OrderSummaryCard extends StatelessWidget {
                   ),
                 ],
               ),
-
               const SizedBox(width: 12),
-
-              // Info produk + harga
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      food.name,
-                      maxLines: 1,
+                      food.nama,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 14,
@@ -186,7 +180,9 @@ class OrderSummaryCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Pastry & Sourdough Pilihan Chef',
+                      food.namaToko.isNotEmpty
+                          ? food.namaToko
+                          : food.kategori,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.plusJakartaSans(
@@ -196,7 +192,6 @@ class OrderSummaryCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    // Baris harga (Wrap agar turun baris di layar sempit)
                     Wrap(
                       crossAxisAlignment: WrapCrossAlignment.center,
                       spacing: 8,
@@ -221,42 +216,45 @@ class OrderSummaryCard extends StatelessWidget {
                             decorationColor: AppColors.outline,
                           ),
                         ),
-                        // Badge hemat
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.secondaryContainer,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            'Hemat ${_formatShortPrice(hemat)}',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 10,
-                              height: 14 / 10,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.onSecondaryContainer,
+                        if (hemat > 0)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.secondaryContainer,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'Hemat ${_formatShortPrice(hemat)}',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 10,
+                                height: 14 / 10,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.onSecondaryContainer,
+                              ),
                             ),
                           ),
-                        ),
                       ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Jumlah: $quantity • Stok tersedia: ${food.stok}',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11,
+                        height: 16 / 11,
+                        color: AppColors.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ),
               ),
             ],
           ),
-
           const SizedBox(height: 16),
-
-          // Toggle eco-friendly
           const EcoBagToggle(),
-
           const SizedBox(height: 12),
-
-          // Instructions field
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
@@ -277,7 +275,9 @@ class OrderSummaryCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Isi boks acak sesuai surplus segar harian dari panggangan sore. Dijamin higienis & layak konsumsi 100%.',
+                    food.deskripsi.isNotEmpty
+                        ? food.deskripsi
+                        : 'Informasi tambahan produk belum tersedia.',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12,
                       height: 16 / 12,
@@ -289,6 +289,18 @@ class OrderSummaryCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _imagePlaceholder() {
+    return Container(
+      width: 80,
+      height: 80,
+      color: AppColors.surfaceContainerHigh,
+      child: const Icon(
+        Icons.fastfood,
+        color: AppColors.onSurfaceVariant,
       ),
     );
   }

@@ -1,11 +1,11 @@
+
 import 'package:flutter/material.dart';
 
 import '../models/food_model.dart';
 import '../services/food_service.dart';
 
 class FoodProvider extends ChangeNotifier {
-  final FoodService _service =
-      FoodService();
+  final FoodService _service = FoodService();
 
   List<FoodModel> foods = [];
 
@@ -19,15 +19,11 @@ class FoodProvider extends ChangeNotifier {
       isLoading = true;
       notifyListeners();
 
-      final data =
-          await _service.getFoods();
+      final data = await _service.getFoods();
 
       foods = data
           .map<FoodModel>(
-            (item) =>
-                FoodModel.fromJson(
-              item,
-            ),
+            (item) => FoodModel.fromJson(item),
           )
           .toList();
     } finally {
@@ -36,49 +32,39 @@ class FoodProvider extends ChangeNotifier {
     }
   }
 
-  void setSearchQuery(
-    String value,
-  ) {
+  void setSearchQuery(String value) {
     searchQuery = value;
     notifyListeners();
   }
 
-  void setCategory(
-    String value,
-  ) {
+  void setCategory(String value) {
     selectedCategory = value;
     notifyListeners();
   }
 
+  // Hanya tampilkan makanan yang belum kedaluwarsa
+  // dan masih memiliki stok.
   List<FoodModel> get filteredFoods {
-    List<FoodModel> result =
-        List.from(foods);
+    List<FoodModel> result = foods.where((food) {
+      return food.stok > 0 && !food.isExpired;
+    }).toList();
 
-    if (searchQuery.isNotEmpty) {
-      final keyword =
-          searchQuery.toLowerCase();
+    // Filter pencarian.
+    final keyword = searchQuery.trim().toLowerCase();
 
+    if (keyword.isNotEmpty) {
       result = result.where((food) {
-        return food.nama
-                .toLowerCase()
-                .contains(keyword) ||
-            food.namaToko
-                .toLowerCase()
-                .contains(keyword) ||
-            food.deskripsi
-                .toLowerCase()
-                .contains(keyword);
+        return food.nama.toLowerCase().contains(keyword) ||
+            food.namaToko.toLowerCase().contains(keyword) ||
+            food.deskripsi.toLowerCase().contains(keyword);
       }).toList();
     }
 
-    if (selectedCategory !=
-        'Semua') {
+    // Filter kategori.
+    if (selectedCategory != 'Semua') {
       result = result.where((food) {
-        return food.kategori
-            .toLowerCase()
-            .contains(
-              selectedCategory
-                  .toLowerCase(),
+        return food.kategori.toLowerCase().contains(
+              selectedCategory.toLowerCase(),
             );
       }).toList();
     }
@@ -86,28 +72,30 @@ class FoodProvider extends ChangeNotifier {
     return result;
   }
 
+  // Diskon tertinggi dari makanan yang masih tersedia.
   int get highestDiscount {
-    if (foods.isEmpty) return 0;
+    final availableFoods = foods.where((food) {
+      return food.stok > 0 && !food.isExpired;
+    }).toList();
 
-    return foods
-        .map(
-          (e) => e.persenDiskon,
-        )
-        .reduce(
-          (a, b) =>
-              a > b ? a : b,
-        );
+    if (availableFoods.isEmpty) return 0;
+
+    return availableFoods
+        .map((food) => food.persenDiskon)
+        .reduce((a, b) => a > b ? a : b);
   }
 
+  // Total stok makanan yang masih tersedia.
   int get totalStock {
-    return foods.fold(
-      0,
-      (sum, item) =>
-          sum + item.stok,
-    );
+    return foods
+        .where((food) => !food.isExpired && food.stok > 0)
+        .fold(0, (sum, item) => sum + item.stok);
   }
 
+  // Jumlah jenis makanan yang masih tersedia.
   int get totalProducts {
-    return foods.length;
+    return foods
+        .where((food) => !food.isExpired && food.stok > 0)
+        .length;
   }
 }

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../../core/theme/app_colors.dart';
-import '../../../data/dummy_foods.dart';
+import '../../core/theme/app_colors.dart';
+import '../../models/food_model.dart';
 import '../checkout/checkout_page.dart';
 
 class FoodDetailPage extends StatefulWidget {
-  final DummyFood food;
+  final FoodModel food;
 
   const FoodDetailPage({
     super.key,
@@ -14,28 +14,29 @@ class FoodDetailPage extends StatefulWidget {
   });
 
   @override
-  State<FoodDetailPage> createState() =>
-      _FoodDetailPageState();
+  State<FoodDetailPage> createState() => _FoodDetailPageState();
 }
 
-class _FoodDetailPageState
-    extends State<FoodDetailPage> {
+class _FoodDetailPageState extends State<FoodDetailPage> {
   int _qty = 1;
   bool _isBookmarked = false;
 
-  DummyFood get _food => widget.food;
+  FoodModel get _food => widget.food;
 
-  int get _maxQty =>
-      _food.boxesLeft > 0 ? _food.boxesLeft : 1;
+  bool get _canOrder => !_food.isExpired && _food.stok > 0;
 
-  int get _subtotal =>
-      _food.discountPrice * _qty;
+  int get _maxQty => _food.stok > 0 ? _food.stok : 1;
 
-  String _formatPrice(int price) =>
-      'Rp ${price.toString().replaceAllMapped(
-            RegExp(r'(\d)(?=(\d{3})+$)'),
-            (m) => '${m[1]}.',
-          )}';
+  int get _subtotal => _food.hargaDiskon.round() * _qty;
+
+  String _formatPrice(num price) {
+    final value = price.round().toString();
+
+    return 'Rp ${value.replaceAllMapped(
+      RegExp(r'(\d)(?=(\d{3})+$)'),
+      (match) => '${match[1]}.',
+    )}';
+  }
 
   void _decrement() {
     if (_qty > 1) {
@@ -44,12 +45,40 @@ class _FoodDetailPageState
   }
 
   void _increment() {
-    if (_qty < _maxQty) {
+    if (_qty < _maxQty && _canOrder) {
       setState(() => _qty++);
     }
   }
 
   void _goToCheckout() {
+    if (_food.isExpired) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Maaf, makanan ini sudah kedaluwarsa.'),
+        ),
+      );
+      return;
+    }
+
+    if (_food.stok <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Maaf, stok makanan sudah habis.'),
+        ),
+      );
+      return;
+    }
+
+    if (_qty > _food.stok) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Jumlah pesanan melebihi stok yang tersedia.'),
+        ),
+      );
+      setState(() => _qty = _food.stok);
+      return;
+    }
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -67,45 +96,30 @@ class _FoodDetailPageState
       backgroundColor: AppColors.surface,
       body: Stack(
         children: [
-          // Scrollable content
           SingleChildScrollView(
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildHeroImage(),
-
                 Padding(
-                  padding:
-                      const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                   child: Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildMerchantCard(),
-
                       const SizedBox(height: 16),
-
                       _buildProductIdentity(),
-
                       const SizedBox(height: 16),
-
                       _buildPickupDetails(),
-
                       const SizedBox(height: 16),
-
                       _buildDescriptionCard(),
                     ],
                   ),
                 ),
-
-                // Ruang untuk sticky bottom bar
-                const SizedBox(height: 160),
+                const SizedBox(height: 170),
               ],
             ),
           ),
-
-          // Floating header (di atas hero image)
           Positioned(
             top: 0,
             left: 0,
@@ -117,40 +131,41 @@ class _FoodDetailPageState
                   vertical: 8,
                 ),
                 child: Row(
-                  mainAxisAlignment:
-                      MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     _circleHeaderButton(
                       icon: Icons.arrow_back,
                       iconColor: AppColors.primary,
-                      onTap: () =>
-                          Navigator.pop(context),
+                      onTap: () => Navigator.pop(context),
                     ),
                     Row(
                       children: [
                         _circleHeaderButton(
                           icon: Icons.share,
-                          iconColor:
-                              AppColors.onSurfaceVariant,
+                          iconColor: AppColors.onSurfaceVariant,
                           onTap: () {
-                            // TODO: bagikan produk
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Fitur berbagi belum tersedia.',
+                                ),
+                              ),
+                            );
                           },
                         ),
                         const SizedBox(width: 8),
                         _circleHeaderButton(
                           icon: _isBookmarked
                               ? Icons.bookmark
-                              : Icons
-                                  .bookmark_border,
+                              : Icons.bookmark_border,
                           iconColor: _isBookmarked
-                              ? AppColors
-                                  .primaryContainer
-                              : AppColors
-                                  .onSurfaceVariant,
-                          onTap: () => setState(
-                            () => _isBookmarked =
-                                !_isBookmarked,
-                          ),
+                              ? AppColors.primary
+                              : AppColors.onSurfaceVariant,
+                          onTap: () {
+                            setState(() {
+                              _isBookmarked = !_isBookmarked;
+                            });
+                          },
                         ),
                       ],
                     ),
@@ -159,8 +174,6 @@ class _FoodDetailPageState
               ),
             ),
           ),
-
-          // Sticky bottom purchase bar
           Positioned(
             left: 0,
             right: 0,
@@ -172,29 +185,24 @@ class _FoodDetailPageState
     );
   }
 
-  // ---------- HERO ----------
+  // HERO IMAGE
 
   Widget _buildHeroImage() {
     return Stack(
       children: [
         AspectRatio(
           aspectRatio: 4 / 3,
-          child: Image.network(
-            _food.image,
-            width: double.infinity,
-            fit: BoxFit.cover,
-            errorBuilder: (_, _, _) => Container(
-              color: AppColors.surfaceContainerHigh,
-              child: const Icon(
-                Icons.fastfood,
-                size: 48,
-                color: AppColors.onSurfaceVariant,
-              ),
-            ),
-          ),
+          child: _food.foto.isNotEmpty
+              ? Image.network(
+                  _food.foto,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, error, stackTrace) {
+                    return _imagePlaceholder();
+                  },
+                )
+              : _imagePlaceholder(),
         ),
-
-        // Vignette gradasi ke warna surface
         Positioned.fill(
           child: IgnorePointer(
             child: DecoratedBox(
@@ -204,10 +212,8 @@ class _FoodDetailPageState
                   end: Alignment.topCenter,
                   colors: [
                     AppColors.surface,
-                    AppColors.surface
-                        .withValues(alpha: 0.0),
-                    AppColors.surface
-                        .withValues(alpha: 0.0),
+                    AppColors.surface.withValues(alpha: 0.0),
+                    AppColors.surface.withValues(alpha: 0.0),
                   ],
                   stops: const [0.0, 0.55, 1.0],
                 ),
@@ -215,46 +221,53 @@ class _FoodDetailPageState
             ),
           ),
         ),
-
-        // Badges overlay
         Positioned(
           left: 16,
           right: 16,
           bottom: 16,
-          child: Row(
-            crossAxisAlignment:
-                CrossAxisAlignment.end,
+          child: Wrap(
+            spacing: 6,
+            runSpacing: 6,
             children: [
-              Flexible(
-                child: Wrap(
-                  spacing: 4,
-                  runSpacing: 4,
-                  children: [
-                    _heroBadge(
-                      icon: Icons.timer,
-                      label:
-                          'Tersisa ${_food.boxesLeft} Box',
-                      background: AppColors.error,
-                      foreground:
-                          AppColors.onError,
-                    ),
-                    _heroBadge(
-                      icon: Icons.eco,
-                      label:
-                          'Hemat ${_food.discountPercent}%',
-                      background:
-                          AppColors.primaryContainer,
-                      foreground: AppColors.surface,
-                    ),
-                  ],
-                ),
+              _heroBadge(
+                icon: _food.isExpired
+                    ? Icons.block
+                    : Icons.inventory_2_outlined,
+                label: _food.isExpired
+                    ? 'Kedaluwarsa'
+                    : _food.stok > 0
+                        ? 'Tersisa ${_food.stok} porsi'
+                        : 'Stok habis',
+                background: _food.isExpired
+                    ? AppColors.error
+                    : _food.stok > 0
+                        ? AppColors.primary
+                        : Colors.grey,
+                foreground: Colors.white,
               ),
-              const SizedBox(width: 8),
-              Flexible(child: _buildCo2Chip()),
+              if (_food.persenDiskon > 0)
+                _heroBadge(
+                  icon: Icons.eco,
+                  label: 'Hemat ${_food.persenDiskon}%',
+                  background: AppColors.primaryContainer,
+                  foreground: AppColors.surface,
+                ),
             ],
           ),
         ),
       ],
+    );
+  }
+
+  Widget _imagePlaceholder() {
+    return Container(
+      color: AppColors.surfaceContainerHigh,
+      alignment: Alignment.center,
+      child: const Icon(
+        Icons.fastfood,
+        size: 48,
+        color: AppColors.onSurfaceVariant,
+      ),
     );
   }
 
@@ -266,88 +279,24 @@ class _FoodDetailPageState
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: 8,
-        vertical: 2,
+        horizontal: 10,
+        vertical: 6,
       ),
       decoration: BoxDecoration(
         color: background,
-        borderRadius:
-            BorderRadius.circular(999),
-        boxShadow: [
-          BoxShadow(
-            color:
-                Colors.black.withValues(alpha: 0.04),
-            blurRadius: 2,
-            offset: const Offset(0, 1),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 13, color: foreground),
-          const SizedBox(width: 4),
-          Flexible(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 10,
-                height: 14 / 10,
-                fontWeight: FontWeight.w700,
-                color: foreground,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCo2Chip() {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 10,
-        vertical: 4,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceContainerLowest
-            .withValues(alpha: 0.95),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: AppColors.outlineVariant
-              .withValues(alpha: 0.4),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color:
-                Colors.black.withValues(alpha: 0.04),
-            blurRadius: 2,
-            offset: const Offset(0, 1),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(
-            Icons.compost,
-            size: 14,
-            color: AppColors.primary,
-          ),
-          const SizedBox(width: 4),
-          Flexible(
-            child: Text(
-              '1.4 kg CO₂e Saved',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 10,
-                height: 14 / 10,
-                fontWeight: FontWeight.w700,
-                color: AppColors.primary,
-              ),
+          Icon(icon, size: 14, color: foreground),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: foreground,
             ),
           ),
         ],
@@ -366,13 +315,13 @@ class _FoodDetailPageState
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: AppColors.surfaceContainerLowest
-              .withValues(alpha: 0.9),
+          color: AppColors.surfaceContainerLowest.withValues(
+            alpha: 0.9,
+          ),
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color:
-                  Colors.black.withValues(alpha: 0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 2,
               offset: const Offset(0, 1),
             ),
@@ -383,7 +332,7 @@ class _FoodDetailPageState
     );
   }
 
-  // ---------- MERCHANT ----------
+  // MERCHANT
 
   Widget _buildMerchantCard() {
     return Container(
@@ -392,344 +341,182 @@ class _FoodDetailPageState
         color: AppColors.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppColors.outlineVariant
-              .withValues(alpha: 0.30),
+          color: AppColors.outlineVariant.withValues(alpha: 0.3),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryContainer
-                .withValues(alpha: 0.06),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Row(
         children: [
-          // Avatar toko
           Container(
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: AppColors.secondaryContainer
-                  .withValues(alpha: 0.4),
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: AppColors.primaryFixedDim
-                    .withValues(alpha: 0.4),
+              color: AppColors.secondaryContainer.withValues(
+                alpha: 0.4,
               ),
+              shape: BoxShape.circle,
             ),
             child: const Icon(
-              Icons.bakery_dining,
+              Icons.storefront,
               size: 28,
-              color: AppColors.primaryContainer,
+              color: AppColors.primary,
             ),
           ),
-
-          const SizedBox(width: 8),
-
-          // Nama & meta
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        _food.store,
-                        maxLines: 1,
-                        overflow:
-                            TextOverflow.ellipsis,
-                        style: GoogleFonts
-                            .plusJakartaSans(
-                          fontSize: 18,
-                          height: 24 / 18,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.onSurface,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(
-                      Icons.verified,
-                      size: 18,
-                      color:
-                          AppColors.primaryContainer,
-                    ),
-                  ],
+                Text(
+                  _food.namaToko.isNotEmpty
+                      ? _food.namaToko
+                      : 'Mitra CheaFood',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.onSurface,
+                  ),
                 ),
-                const SizedBox(height: 2),
-                Wrap(
-                  crossAxisAlignment:
-                      WrapCrossAlignment.center,
-                  spacing: 4,
-                  runSpacing: 4,
-                  children: [
-                    const Icon(
-                      Icons.star,
-                      size: 15,
-                      color: Color(0xFFF59E0B),
-                    ),
-                    Text(
-                      _food.rating.toString(),
-                      style: GoogleFonts
-                          .plusJakartaSans(
-                        fontSize: 12,
-                        height: 16 / 12,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.onSurface,
-                      ),
-                    ),
-                    _metaDot(),
-                    Text(
-                      '(420+ ulasan)',
-                      style: GoogleFonts
-                          .plusJakartaSans(
-                        fontSize: 12,
-                        height: 16 / 12,
-                        color:
-                            AppColors.onSurfaceVariant,
-                      ),
-                    ),
-                    _metaDot(),
-                    const Icon(
-                      Icons.near_me,
-                      size: 14,
-                      color: AppColors.primary,
-                    ),
-                    Text(
-                      _food.distance,
-                      style: GoogleFonts
-                          .plusJakartaSans(
-                        fontSize: 12,
-                        height: 16 / 12,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ],
+                const SizedBox(height: 4),
+                Text(
+                  'Mitra makanan CheaFood',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    color: AppColors.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
           ),
-
           const SizedBox(width: 8),
-
-          // Tombol profil mitra
-          Container(
-            width: 36,
-            height: 36,
-            decoration: const BoxDecoration(
-              color: AppColors.surfaceContainer,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.chevron_right,
-              size: 20,
-              color: AppColors.primary,
-            ),
+          const Icon(
+            Icons.verified,
+            size: 20,
+            color: AppColors.primary,
           ),
         ],
       ),
     );
   }
 
-  Widget _metaDot() {
-    return Text(
-      '•',
-      style: GoogleFonts.plusJakartaSans(
-        fontSize: 12,
-        height: 16 / 12,
-        color: AppColors.onSurfaceVariant,
-      ),
-    );
-  }
-
-  // ---------- PRODUCT IDENTITY ----------
+  // PRODUCT IDENTITY
 
   Widget _buildProductIdentity() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Judul produk
         Text(
-          _food.name,
+          _food.nama,
           style: GoogleFonts.plusJakartaSans(
             fontSize: 26,
-            height: 34 / 26,
+            height: 1.3,
             fontWeight: FontWeight.w700,
             color: AppColors.onSurface,
           ),
         ),
-
         const SizedBox(height: 4),
-
-        // Kategori
         Text(
-          'Kategori: ${_food.category}',
+          'Kategori: ${_food.kategori}',
           style: GoogleFonts.plusJakartaSans(
             fontSize: 12,
-            height: 16 / 12,
             color: AppColors.onSurfaceVariant,
           ),
         ),
-
         const SizedBox(height: 8),
-
-        // Baris harga (Wrap agar turun baris di layar sempit)
         Wrap(
           crossAxisAlignment: WrapCrossAlignment.center,
           spacing: 8,
           runSpacing: 4,
           children: [
             Text(
-              _formatPrice(_food.discountPrice),
+              _formatPrice(_food.hargaDiskon),
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 32,
-                height: 40 / 32,
+                fontSize: 30,
                 fontWeight: FontWeight.w800,
-                letterSpacing: -0.5,
                 color: AppColors.primaryContainer,
               ),
             ),
-            Text(
-              _formatPrice(_food.originalPrice),
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 14,
-                height: 20 / 14,
-                color: AppColors.outline,
-                decoration: TextDecoration.lineThrough,
-                decorationColor: AppColors.outline,
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8,
-                vertical: 2,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.secondaryContainer,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                'Hemat ${_food.discountPercent}%',
+            if (_food.hargaOriginal > _food.hargaDiskon)
+              Text(
+                _formatPrice(_food.hargaOriginal),
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 10,
-                  height: 14 / 10,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.onSecondaryContainer,
+                  fontSize: 14,
+                  color: AppColors.outline,
+                  decoration: TextDecoration.lineThrough,
                 ),
               ),
-            ),
+            if (_food.persenDiskon > 0)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.secondaryContainer,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'Hemat ${_food.persenDiskon}%',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.onSecondaryContainer,
+                  ),
+                ),
+              ),
           ],
         ),
-
         const SizedBox(height: 12),
-
-        // Stock scarcity bar
         _buildStockBar(),
       ],
     );
   }
 
   Widget _buildStockBar() {
-    final total = _food.totalStock > 0
-        ? _food.totalStock
-        : _food.sold + _food.boxesLeft;
-    final progress = total > 0
-        ? (_food.sold / total).clamp(0.0, 1.0)
-        : 0.0;
+    final isAvailable = _canOrder;
 
     return Container(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: AppColors.outlineVariant
-              .withValues(alpha: 0.30),
+          color: AppColors.outlineVariant.withValues(alpha: 0.3),
         ),
       ),
-      child: Column(
+      child: Row(
         children: [
-          Row(
-            mainAxisAlignment:
-                MainAxisAlignment.spaceBetween,
-            children: [
-              Flexible(
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.local_fire_department,
-                      size: 16,
-                      color: AppColors.error,
-                    ),
-                    const SizedBox(width: 4),
-                    Flexible(
-                      child: Text(
-                        'Sisa ${_food.boxesLeft} porsi lagi!',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts
-                            .plusJakartaSans(
-                          fontSize: 12,
-                          height: 16 / 12,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.error,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Text(
-                'Terjual ${_food.sold}/$total',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12,
-                  height: 16 / 12,
-                  color: AppColors.onSurfaceVariant,
-                ),
-              ),
-            ],
+          Icon(
+            isAvailable
+                ? Icons.inventory_2_outlined
+                : Icons.remove_shopping_cart,
+            size: 20,
+            color: isAvailable ? AppColors.primary : AppColors.error,
           ),
-          const SizedBox(height: 6),
-          // Progress track
-          Stack(
-            children: [
-              Container(
-                height: 8,
-                decoration: BoxDecoration(
-                  color: AppColors
-                      .surfaceContainerHighest,
-                  borderRadius:
-                      BorderRadius.circular(999),
-                ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              _food.isExpired
+                  ? 'Makanan sudah kedaluwarsa'
+                  : _food.stok > 0
+                      ? 'Stok tersedia: ${_food.stok} porsi'
+                      : 'Stok makanan habis',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: isAvailable
+                    ? AppColors.onSurface
+                    : AppColors.error,
               ),
-              FractionallySizedBox(
-                widthFactor: progress,
-                child: Container(
-                  height: 8,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [
-                        AppColors.secondary,
-                        AppColors.error,
-                      ],
-                    ),
-                    borderRadius:
-                        BorderRadius.circular(999),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  // ---------- PICKUP DETAILS ----------
+  // PICKUP DETAILS
 
   Widget _buildPickupDetails() {
     return _detailCard(
@@ -740,115 +527,83 @@ class _FoodDetailPageState
         children: [
           _infoRow(
             icon: Icons.location_on,
-            iconBackground: AppColors.primaryFixed
-                .withValues(alpha: 0.5),
-            iconColor: AppColors.primary,
             label: 'Lokasi Pengambilan',
-            value:
-                'Jl. Kemang Raya No. 14, Jakarta Selatan',
-            note:
-                'Samping Galeri Seni Kemang, parkir motor & mobil tersedia.',
+            value: _food.namaToko.isNotEmpty
+                ? 'Silakan konfirmasi alamat kepada ${_food.namaToko}.'
+                : 'Informasi alamat mitra belum tersedia.',
+            iconColor: AppColors.primary,
           ),
-
-          const SizedBox(height: 12),
-
+          const SizedBox(height: 16),
           _infoRow(
-            icon: Icons.schedule,
-            iconBackground: AppColors
-                .secondaryContainer
-                .withValues(alpha: 0.5),
+            icon: Icons.inventory_2_outlined,
+            label: 'Ketersediaan',
+            value: _food.isExpired
+                ? 'Makanan sudah kedaluwarsa dan tidak dapat dipesan.'
+                : _food.stok > 0
+                    ? 'Tersedia ${_food.stok} porsi.'
+                    : 'Stok saat ini habis.',
             iconColor: AppColors.secondary,
-            label: 'Jadwal Pickup Mandiri',
-            value:
-                'Hari ini, ${_food.pickupTime} WIB',
-            valueColor: AppColors.primaryContainer,
-            note:
-                'Ambil sebelum toko tutup pada pukul 21:30 WIB',
           ),
-
-          const SizedBox(height: 12),
-
+          const SizedBox(height: 16),
           _infoRow(
             icon: Icons.qr_code_scanner,
-            iconBackground:
-                AppColors.surfaceContainer,
-            iconColor: AppColors.onSurface,
             label: 'Petunjuk Klaim Makanan',
             value:
-                'Tunjukkan QR Code pesanan aktif pada staf kasir saat tiba di outlet. Makanan sudah dikemas siap bawa.',
-            highlighted: true,
+                'Setelah pesanan dikonfirmasi, ikuti petunjuk pengambilan yang tersedia pada detail pesanan.',
+            iconColor: AppColors.primary,
           ),
         ],
       ),
     );
   }
 
-  // ---------- DESCRIPTION ----------
+  // DESCRIPTION
 
   Widget _buildDescriptionCard() {
     return _detailCard(
       icon: Icons.restaurant,
-      title: 'Deskripsi Makanan & Dampak',
+      title: 'Deskripsi Makanan',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Paket kejutan berisi aneka croissant butter, pain au chocolat, dan artisanal sourdough segar hari ini yang belum terjual. Kualitas prima dan higienis terjamin.',
+            _food.deskripsi.isNotEmpty
+                ? _food.deskripsi
+                : 'Belum ada deskripsi untuk makanan ini.',
             style: GoogleFonts.plusJakartaSans(
               fontSize: 14,
-              height: 20 / 14,
+              height: 1.5,
               color: AppColors.onSurfaceVariant,
             ),
           ),
-
           const SizedBox(height: 12),
-
-          // Komitmen zero waste
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: AppColors.surfaceContainerLow,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: AppColors.primaryFixedDim
-                    .withValues(alpha: 0.3),
+                color: AppColors.primaryFixedDim.withValues(
+                  alpha: 0.3,
+                ),
               ),
             ),
             child: Row(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Icon(
                   Icons.energy_savings_leaf,
                   size: 22,
-                  color: AppColors.primaryContainer,
+                  color: AppColors.primary,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text.rich(
-                    TextSpan(
-                      style: GoogleFonts
-                          .plusJakartaSans(
-                        fontSize: 12,
-                        height: 16 / 12,
-                        color: AppColors.onSurface,
-                      ),
-                      children: [
-                        TextSpan(
-                          text:
-                              'Komitmen Zero Waste:',
-                          style: GoogleFonts
-                              .plusJakartaSans(
-                            fontWeight:
-                                FontWeight.w700,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                        const TextSpan(
-                          text:
-                              ' Dengan menyelamatkan paket ini, kamu telah mencegah 1.4 kg jejak karbon emisi metana dari tempat pembuangan akhir.',
-                        ),
-                      ],
+                  child: Text(
+                    'Dengan membeli makanan berlebih, kamu membantu mengurangi makanan yang terbuang dan mendukung gerakan pengurangan food waste.',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12,
+                      height: 1.5,
+                      color: AppColors.onSurface,
                     ),
                   ),
                 ),
@@ -860,7 +615,7 @@ class _FoodDetailPageState
     );
   }
 
-  // ---------- SHARED CARD ----------
+  // SHARED CARD
 
   Widget _detailCard({
     required IconData icon,
@@ -873,13 +628,11 @@ class _FoodDetailPageState
         color: AppColors.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppColors.outlineVariant
-              .withValues(alpha: 0.30),
+          color: AppColors.outlineVariant.withValues(alpha: 0.3),
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryContainer
-                .withValues(alpha: 0.06),
+            color: AppColors.primaryContainer.withValues(alpha: 0.06),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -888,10 +641,8 @@ class _FoodDetailPageState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header dengan garis bawah
           Container(
-            padding:
-                const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.only(bottom: 10),
             decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(
@@ -907,15 +658,11 @@ class _FoodDetailPageState
                   color: AppColors.primaryContainer,
                 ),
                 const SizedBox(width: 8),
-                Flexible(
+                Expanded(
                   child: Text(
                     title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts
-                        .plusJakartaSans(
-                      fontSize: 18,
-                      height: 24 / 18,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 17,
                       fontWeight: FontWeight.w600,
                       color: AppColors.onSurface,
                     ),
@@ -924,9 +671,7 @@ class _FoodDetailPageState
               ],
             ),
           ),
-
           const SizedBox(height: 12),
-
           child,
         ],
       ),
@@ -935,106 +680,69 @@ class _FoodDetailPageState
 
   Widget _infoRow({
     required IconData icon,
-    required Color iconBackground,
-    required Color iconColor,
     required String label,
     required String value,
-    String? note,
-    Color valueColor = AppColors.onSurface,
-    bool highlighted = false,
+    required Color iconColor,
   }) {
-    final row = Row(
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 32,
-          height: 32,
+          width: 34,
+          height: 34,
           decoration: BoxDecoration(
-            color: iconBackground,
+            color: iconColor.withValues(alpha: 0.12),
             shape: BoxShape.circle,
           ),
-          child: Icon(
-            icon,
-            size: 18,
-            color: iconColor,
-          ),
+          child: Icon(icon, size: 18, color: iconColor),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 label,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 12,
-                  height: 16 / 12,
                   fontWeight: FontWeight.w600,
                   color: AppColors.onSurfaceVariant,
                 ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: 3),
               Text(
                 value,
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14,
-                  height: 20 / 14,
-                  fontWeight: FontWeight.w700,
-                  color: valueColor,
-                ),
-              ),
-              if (note != null) ...[
-                const SizedBox(height: 2),
-                Text(
-                  note,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    height: 16 / 12,
-                    color: AppColors.onSurfaceVariant,
-                  ),
-                ),
-              ],
+                  fontSize: 13,
+                  height: 1.5,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.onSurface,
+                 
+  ),             ),
             ],
           ),
         ),
       ],
     );
-
-    if (highlighted) {
-      return Container(
-        // Padding kiri = 0 agar ikon & teks sejajar dengan baris
-        // Lokasi & Jadwal di atasnya (box hover pun background
-        // penuh sampai tepi konten kartu).
-        padding: const EdgeInsets.fromLTRB(0, 10, 10, 10),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: row,
-      );
-    }
-    return row;
   }
 
-  // ---------- BOTTOM BAR ----------
+  // BOTTOM BAR
 
   Widget _buildBottomBar() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainerLowest
-            .withValues(alpha: 0.98),
+        color: AppColors.surfaceContainerLowest.withValues(
+          alpha: 0.98,
+        ),
         border: Border(
           top: BorderSide(
-            color: AppColors.outlineVariant
-                .withValues(alpha: 0.2),
+            color: AppColors.outlineVariant.withValues(alpha: 0.2),
           ),
         ),
         boxShadow: [
           BoxShadow(
-            color:
-                Colors.black.withValues(alpha: 0.06),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 20,
             offset: const Offset(0, -4),
           ),
@@ -1043,38 +751,29 @@ class _FoodDetailPageState
       child: SafeArea(
         top: false,
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // Subtotal + stepper
             Row(
-              mainAxisAlignment:
-                  MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Flexible(
                   child: Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Subtotal Tagihan',
-                        maxLines: 1,
-                        style: GoogleFonts
-                            .plusJakartaSans(
-                          fontSize: 10,
-                          height: 14 / 10,
-                          color: AppColors
-                              .onSurfaceVariant,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          color: AppColors.onSurfaceVariant,
                         ),
                       ),
+                      const SizedBox(height: 2),
                       Text(
                         _formatPrice(_subtotal),
-                        maxLines: 1,
-                        style: GoogleFonts
-                            .plusJakartaSans(
-                          fontSize: 18,
-                          height: 24 / 18,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 19,
                           fontWeight: FontWeight.w800,
-                          color: AppColors
-                              .primaryContainer,
+                          color: AppColors.primaryContainer,
                         ),
                       ),
                     ],
@@ -1083,20 +782,38 @@ class _FoodDetailPageState
                 _buildStepper(),
               ],
             ),
-
-            const SizedBox(height: 8),
-
-            // Tombol keranjang + checkout
-            Row(
-              children: [
-                _buildCartButton(),
-
-                const SizedBox(width: 8),
-
-                Expanded(
-                  child: _buildCheckoutButton(),
+            const SizedBox(height: 10),
+            SizedBox(
+              height: 48,
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _canOrder ? _goToCheckout : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.ctaGreen,
+                  foregroundColor: AppColors.onPrimary,
+                  disabledBackgroundColor: Colors.grey.shade300,
+                  disabledForegroundColor: Colors.grey.shade600,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
                 ),
-              ],
+                icon: Icon(
+                  _food.isExpired ? Icons.block : Icons.bolt,
+                  size: 20,
+                ),
+                label: Text(
+                  _food.isExpired
+                      ? 'Makanan Kedaluwarsa'
+                      : _food.stok > 0
+                          ? 'Pesan Sekarang'
+                          : 'Stok Habis',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -1111,17 +828,13 @@ class _FoodDetailPageState
         color: AppColors.surfaceContainer,
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
-          color: AppColors.outlineVariant
-              .withValues(alpha: 0.30),
+          color: AppColors.outlineVariant.withValues(alpha: 0.3),
         ),
       ),
       child: Row(
         children: [
           _stepperButton(
             icon: Icons.remove,
-            background:
-                AppColors.surfaceContainerLowest,
-            foreground: AppColors.onSurface,
             enabled: _qty > 1,
             onTap: _decrement,
           ),
@@ -1131,8 +844,7 @@ class _FoodDetailPageState
               '$_qty',
               textAlign: TextAlign.center,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 18,
-                height: 24 / 18,
+                fontSize: 16,
                 fontWeight: FontWeight.w700,
                 color: AppColors.onSurface,
               ),
@@ -1140,10 +852,9 @@ class _FoodDetailPageState
           ),
           _stepperButton(
             icon: Icons.add,
-            background: AppColors.ctaGreen,
-            foreground: AppColors.surface,
-            enabled: _qty < _maxQty,
+            enabled: _qty < _maxQty && _canOrder,
             onTap: _increment,
+            isAdd: true,
           ),
         ],
       ),
@@ -1152,10 +863,9 @@ class _FoodDetailPageState
 
   Widget _stepperButton({
     required IconData icon,
-    required Color background,
-    required Color foreground,
     required bool enabled,
     required VoidCallback onTap,
+    bool isAdd = false,
   }) {
     return GestureDetector(
       onTap: enabled ? onTap : null,
@@ -1165,85 +875,16 @@ class _FoodDetailPageState
           width: 32,
           height: 32,
           decoration: BoxDecoration(
-            color: background,
+            color: isAdd
+                ? AppColors.ctaGreen
+                : AppColors.surfaceContainerLowest,
             shape: BoxShape.circle,
           ),
           child: Icon(
             icon,
             size: 18,
-            color: foreground,
+            color: isAdd ? AppColors.surface : AppColors.onSurface,
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCartButton() {
-    return GestureDetector(
-      onTap: () {
-        // TODO: tambah ke keranjang
-      },
-      child: Container(
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          color: AppColors.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: AppColors.outlineVariant
-                .withValues(alpha: 0.4),
-          ),
-        ),
-        child: const Icon(
-          Icons.add_shopping_cart,
-          size: 22,
-          color: AppColors.primary,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCheckoutButton() {
-    return GestureDetector(
-      onTap: _goToCheckout,
-      child: Container(
-        height: 48,
-        decoration: BoxDecoration(
-          color: AppColors.ctaGreen,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primaryContainer
-                  .withValues(alpha: 0.2),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment:
-              MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.bolt,
-              size: 20,
-              color: AppColors.onPrimary,
-            ),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                'Pesan Sekarang (3-Tap)',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14,
-                  height: 20 / 14,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.onPrimary,
-                ),
-              ),
-            ),
-          ],
         ),
       ),
     );

@@ -66,9 +66,14 @@ class _ProductListPageState extends State<ProductListPage> {
     final allProducts = productProvider.products;
     final now = DateTime.now();
 
-    // Produk yang masih memiliki stok.
-    final activeProducts =
-        allProducts.where((product) => product.stock > 0).toList();
+    // Produk aktif: stok tersedia dan belum kedaluwarsa.
+final activeProducts = allProducts.where((product) {
+  final expiredDate = DateTime.tryParse(product.expiredAt);
+
+  return product.stock > 0 &&
+      expiredDate != null &&
+      !expiredDate.isBefore(now);
+}).toList();
 
     // Produk yang stoknya habis.
     final soldOutProducts =

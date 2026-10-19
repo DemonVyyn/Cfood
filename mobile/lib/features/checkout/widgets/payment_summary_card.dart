@@ -1,11 +1,11 @@
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../../core/theme/app_colors.dart';
-import '../../../data/dummy_foods.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../models/food_model.dart';
 import 'checkout_card.dart';
 
-/// Garis putus-putus (dashed) sesuai divider pada desain.
 class _DashedDivider extends StatelessWidget {
   const _DashedDivider();
 
@@ -17,6 +17,7 @@ class _DashedDivider extends StatelessWidget {
         const dashSpace = 2.0;
         final count =
             (constraints.maxWidth / (dashWidth + dashSpace)).floor();
+
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: List.generate(
@@ -33,9 +34,8 @@ class _DashedDivider extends StatelessWidget {
   }
 }
 
-/// Kartu ringkasan pembayaran (total, potongan, biaya layanan).
 class PaymentSummaryCard extends StatelessWidget {
-  final DummyFood food;
+  final FoodModel food;
   final int quantity;
 
   const PaymentSummaryCard({
@@ -44,23 +44,26 @@ class PaymentSummaryCard extends StatelessWidget {
     this.quantity = 1,
   });
 
-  String _formatPrice(int price) =>
-      'Rp ${price.toString().replaceAllMapped(
-            RegExp(r'(\d)(?=(\d{3})+$)'),
-            (m) => '${m[1]}.',
-          )}';
+  String _formatPrice(num price) {
+    final value = price.round().toString();
+    final formatted = value.replaceAllMapped(
+      RegExp(r'\B(?=(\d{3})+(?!\d))'),
+      (match) => '.',
+    );
+
+    return 'Rp $formatted';
+  }
 
   @override
   Widget build(BuildContext context) {
-    final totalNormal = food.originalPrice * quantity;
-    final totalDiskon = food.discountPrice * quantity;
+    final totalNormal = food.hargaOriginal * quantity;
+    final totalDiskon = food.hargaDiskon * quantity;
     final potongan = totalNormal - totalDiskon;
 
     return CheckoutCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
           Row(
             children: [
               Container(
@@ -92,10 +95,7 @@ class PaymentSummaryCard extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: 12),
-
-          // Baris rincian
           Column(
             children: [
               _summaryRow(
@@ -120,14 +120,9 @@ class PaymentSummaryCard extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: 12),
-
-          // Total (dengan divider dashed)
           const _DashedDivider(),
-
           const SizedBox(height: 8),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -147,7 +142,7 @@ class PaymentSummaryCard extends StatelessWidget {
                     ),
                     Text(
                       'Bayar saat kamu ambil pesanan',
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
@@ -193,7 +188,7 @@ class PaymentSummaryCard extends StatelessWidget {
               Flexible(
                 child: Text(
                   label,
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 14,
@@ -212,19 +207,23 @@ class PaymentSummaryCard extends StatelessWidget {
               ],
               if (badge != null) ...[
                 const SizedBox(width: 4),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6),
-                  decoration: BoxDecoration(
-                    color: AppColors.secondaryContainer,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    badge,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 9,
-                      height: 20 / 9,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.onSecondaryContainer,
+                Flexible(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    decoration: BoxDecoration(
+                      color: AppColors.secondaryContainer,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      badge,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 9,
+                        height: 20 / 9,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.onSecondaryContainer,
+                      ),
                     ),
                   ),
                 ),
