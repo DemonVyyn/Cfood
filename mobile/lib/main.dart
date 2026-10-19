@@ -15,7 +15,6 @@ import 'features/customer/profile/profile_page.dart';
 import 'features/customer/order_history/order_history_page.dart';
 import 'features/customer/notification/notification_page.dart';
 
-import 'features/pickup/pickup_qr_page.dart';
 
 import 'features/merchant/products/product_list_page.dart';
 import 'features/merchant/products/add_product_page.dart';
@@ -84,7 +83,6 @@ class MyApp extends StatelessWidget {
         '/history': (_) => const OrderHistoryPage(),
         '/notification': (_) => const NotificationPage(),
 
-        '/pickup': (_) => const PickupQrPage(),
 
         '/merchant': (_) => const MerchantShell(),
 

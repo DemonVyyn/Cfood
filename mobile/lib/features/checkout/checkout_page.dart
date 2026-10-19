@@ -1,8 +1,11 @@
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../models/food_model.dart';
+import '../../../services/order_service.dart';
+import '../pickup/pickup_qr_page.dart';
 import 'widgets/pay_notice_banner.dart';
 import 'widgets/pickup_location_card.dart';
 import 'widgets/order_summary_card.dart';
@@ -10,9 +13,7 @@ import 'widgets/payment_summary_card.dart';
 import 'widgets/payment_method_card.dart';
 import 'widgets/checkout_bottom_bar.dart';
 
-/// Halaman Checkout - Konfirmasi Pesanan.
-/// Menggunakan FoodModel dari API, bukan DummyFood.
-class CheckoutPage extends StatelessWidget {
+class CheckoutPage extends StatefulWidget {
   final FoodModel food;
   final int quantity;
 
@@ -23,11 +24,70 @@ class CheckoutPage extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final item = food;
-    final total = item.hargaDiskon.round() * quantity;
+  State<CheckoutPage> createState() => _CheckoutPageState();
+}
 
+class _CheckoutPageState extends State<CheckoutPage> {
+  final OrderService _orderService = OrderService();
+  bool _isLoading = false;
+
+  Future<void> _confirmOrder() async {
+    if (_isLoading) return;
+
+    if (widget.quantity < 1 || widget.food.id < 1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Data makanan atau jumlah pesanan tidak valid.'),
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final order = await _orderService.createOrder(
+        menuId: widget.food.id,
+        quantity: widget.quantity,
+      );
+
+      if (!mounted) return;
+
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => PickupQrPage(
+            order: order,
+            food: widget.food,
+            quantity: widget.quantity,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      final message = e.toString().replaceFirst('Exception: ', '');
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final item = widget.food;
+    final quantity = widget.quantity;
+    final total = item.hargaDiskon.round() * quantity;
     final topPadding = MediaQuery.of(context).padding.top;
+
     const headerContentHeight = 56.0;
     const bottomBarHeight = 132.0;
 
@@ -35,7 +95,6 @@ class CheckoutPage extends StatelessWidget {
       backgroundColor: AppColors.surface,
       body: Stack(
         children: [
-          // Konten checkout yang dapat di-scroll.
           SingleChildScrollView(
             padding: EdgeInsets.fromLTRB(
               16,
@@ -47,44 +106,36 @@ class CheckoutPage extends StatelessWidget {
               children: [
                 const PayNoticeBanner(),
                 const SizedBox(height: 16),
-
-                PickupLocationCard(
-                  food: item,
-                ),
+                PickupLocationCard(food: item),
                 const SizedBox(height: 16),
-
                 OrderSummaryCard(
                   food: item,
                   quantity: quantity,
                 ),
                 const SizedBox(height: 16),
-
                 PaymentSummaryCard(
                   food: item,
                   quantity: quantity,
                 ),
                 const SizedBox(height: 16),
-
                 const PaymentMethodCard(),
               ],
             ),
           ),
-
-          // Header overlay.
           Positioned(
             top: 0,
             left: 0,
             right: 0,
             child: _buildHeader(context, topPadding),
           ),
-
-          // Bottom bar overlay.
           Positioned(
             left: 0,
             right: 0,
             bottom: 0,
             child: CheckoutBottomBar(
               total: total,
+              isLoading: _isLoading,
+              onConfirm: _confirmOrder,
             ),
           ),
         ],
@@ -103,7 +154,6 @@ class CheckoutPage extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Tombol kembali.
           GestureDetector(
             onTap: () => Navigator.pop(context),
             child: Container(
@@ -127,10 +177,7 @@ class CheckoutPage extends StatelessWidget {
               ),
             ),
           ),
-
           const SizedBox(width: 12),
-
-          // Judul dan subtitle.
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -162,17 +209,12 @@ class CheckoutPage extends StatelessWidget {
               ],
             ),
           ),
-
           const SizedBox(width: 8),
-
-          // Ikon eco.
           Container(
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: AppColors.secondaryContainer.withValues(
-                alpha: 0.4,
-              ),
+              color: AppColors.secondaryContainer.withValues(alpha: 0.4),
               shape: BoxShape.circle,
             ),
             child: const Icon(

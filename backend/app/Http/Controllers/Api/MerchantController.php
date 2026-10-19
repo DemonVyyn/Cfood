@@ -104,6 +104,83 @@ class MerchantController extends Controller
         ]);
     }
 
+    public function verifyPayment(Request $request, int $id)
+{
+    $mitra = $request->user()->mitra;
+
+    if (!$mitra) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Data mitra tidak ditemukan.',
+        ], 404);
+    }
+
+    return DB::transaction(function () use ($mitra, $id) {
+        $order = Pesanan::where('mitra_id', $mitra->id)
+            ->whereKey($id)
+            ->lockForUpdate()
+            ->first();
+
+        if (!$order) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pesanan tidak ditemukan atau bukan milik toko ini.',
+            ], 404);
+        }
+
+        if ($order->order_status !== 'menunggu_pembayaran') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pesanan tidak berada pada status menunggu pembayaran.',
+            ], 422);
+        }
+
+        $payment = Pembayaran::where('pesanan_id', $order->id)
+            ->lockForUpdate()
+            ->first();
+
+        if (!$payment) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data pembayaran tidak ditemukan.',
+            ], 422);
+        }
+
+        if ($payment->metode_pembayaran !== 'cash') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Metode pembayaran pesanan ini bukan tunai.',
+            ], 422);
+        }
+
+        if ($payment->status_pembayaran !== 'pending') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pembayaran tidak berstatus pending atau sudah diproses.',
+            ], 422);
+        }
+
+        // Verifikasi manual: mitra harus memeriksa uang tunai terlebih dahulu.
+        $payment->status_pembayaran = 'paid';
+        $payment->waktu_pembayaran = now();
+        $payment->save();
+
+        $order->order_status = 'siap_diambil';
+        $order->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pembayaran berhasil diverifikasi. Pesanan siap diambil.',
+            'data' => [
+                'id' => $order->id,
+                'order_status' => $order->order_status,
+                'status_pembayaran' => $payment->status_pembayaran,
+                'waktu_pembayaran' => $payment->waktu_pembayaran,
+            ],
+        ]);
+    });
+}
+
 
     //confirm pesanan
     public function confirmPickup(Request $request)
@@ -332,8 +409,9 @@ class MerchantController extends Controller
     }
 
     $orders = Pesanan::with([
-        'customer',
-        'items.menu'
+    'customer',
+    'items.menu',
+    'pembayaran',
     ])
     ->where(
         'mitra_id',

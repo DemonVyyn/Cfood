@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 
 import '../models/merchant_order_model.dart';
@@ -10,6 +11,11 @@ class MerchantOrderProvider extends ChangeNotifier {
 
   bool isLoading = false;
   bool isConfirmingPickup = false;
+  final Set<int> _verifyingOrderIds = {};
+
+  bool isVerifyingPayment(int orderId) {
+    return _verifyingOrderIds.contains(orderId);
+  }
 
   Future<void> loadOrders() async {
     try {
@@ -31,6 +37,32 @@ class MerchantOrderProvider extends ChangeNotifier {
     }
   }
 
+  Future<Map<String, dynamic>> verifyPayment(int orderId) async {
+    if (_verifyingOrderIds.contains(orderId)) {
+      throw Exception('Verifikasi pembayaran sedang diproses.');
+    }
+
+    _verifyingOrderIds.add(orderId);
+    notifyListeners();
+
+    try {
+      final result = await _service.verifyPayment(orderId);
+
+      if (result['success'] != true) {
+        throw Exception(
+          result['message']?.toString() ??
+              'Pembayaran gagal diverifikasi.',
+        );
+      }
+
+      await loadOrders();
+      return result;
+    } finally {
+      _verifyingOrderIds.remove(orderId);
+      notifyListeners();
+    }
+  }
+
   Future<Map<String, dynamic>> confirmPickup(
     String pickupCode,
   ) async {
@@ -46,12 +78,11 @@ class MerchantOrderProvider extends ChangeNotifier {
 
       if (result['success'] != true) {
         throw Exception(
-          result['message'] ?? 'Pickup gagal dikonfirmasi.',
+          result['message']?.toString() ?? 'Pickup gagal dikonfirmasi.',
         );
       }
 
       await loadOrders();
-
       return result;
     } finally {
       isConfirmingPickup = false;

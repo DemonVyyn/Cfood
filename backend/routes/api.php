@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\FoodController;
 use App\Http\Controllers\Api\MerchantController;
+use App\Http\Controllers\Api\OrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,6 +30,18 @@ Route::post(
 
 Route::middleware('auth:sanctum')
     ->group(function () {
+
+
+    // Customer: membuat dan melihat pesanan.
+Route::post('/orders', [OrderController::class, 'store']);
+Route::get('/orders', [OrderController::class, 'index']);
+Route::get('/orders/{id}', [OrderController::class, 'show']);
+
+Route::post(
+    '/merchant/orders/{id}/verify-payment',
+    [MerchantController::class, 'verifyPayment']
+);
+
         Route::get(
             '/merchant/dashboard',
             [MerchantController::class, 'dashboard']

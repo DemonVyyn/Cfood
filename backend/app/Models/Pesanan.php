@@ -31,7 +31,7 @@ class Pesanan extends Model
 
     public function mitra()
     {
-        return $this->belongsTo(Mitra::class);
+        return $this->belongsTo(Mitra::class, 'mitra_id');
     }
 
     public function items()

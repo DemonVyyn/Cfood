@@ -35,6 +35,75 @@ class _OrderListPageState extends State<OrderListPage>
     await context.read<MerchantOrderProvider>().loadOrders();
   }
 
+  Future<void> _verifyPayment(
+    MerchantOrderProvider provider,
+    int orderId,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Verifikasi Pembayaran'),
+          content: const Text(
+            'Pastikan Anda sudah menerima uang tunai dari pelanggan '
+            'sesuai total pesanan sebelum melakukan verifikasi.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Batal'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: darkGreen,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: const Text('Ya, Uang Diterima'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    try {
+      final result = await provider.verifyPayment(orderId);
+
+      if (!mounted) return;
+
+      final success = result['success'] == true;
+      final message = result['message']?.toString() ??
+          (success
+              ? 'Pembayaran berhasil diverifikasi.'
+              : 'Pembayaran gagal diverifikasi.');
+
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: success ? darkGreen : Colors.red.shade700,
+          ),
+        );
+    } catch (e) {
+      if (!mounted) return;
+
+      final errorMessage =
+          e.toString().replaceFirst('Exception: ', '');
+
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.red.shade700,
+          ),
+        );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -129,6 +198,9 @@ class _OrderListPageState extends State<OrderListPage>
           pickupTime: order.pickupTime,
           status: order.status,
           totalPrice: order.totalPrice.toInt(),
+          paymentStatus: order.paymentStatus,
+          isVerifying: provider.isVerifyingPayment(order.id),
+          onVerifyPayment: () => _verifyPayment(provider, order.id),
         );
       },
     );

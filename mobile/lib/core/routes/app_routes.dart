@@ -9,8 +9,6 @@ import '../../features/customer/profile/profile_page.dart';
 import '../../features/customer/order_history/order_history_page.dart';
 import '../../features/customer/notification/notification_page.dart';
 
-import '../../features/pickup/pickup_qr_page.dart';
-
 import '../../features/merchant/merchant_shell_page.dart';
 import '../../features/merchant/products/product_list_page.dart';
 import '../../features/merchant/products/add_product_page.dart';
@@ -32,7 +30,6 @@ class AppRoutes {
     '/profile': (_) => const ProfilePage(),
     '/history': (_) => const OrderHistoryPage(),
     '/notification': (_) => const NotificationPage(),
-    '/pickup': (_) => const PickupQrPage(),
 
     // Merchant: halaman induk
     '/merchant': (_) => const MerchantShellPage(),

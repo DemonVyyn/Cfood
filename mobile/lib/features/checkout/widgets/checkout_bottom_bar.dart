@@ -1,25 +1,28 @@
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_colors.dart';
-import '../../pickup/pickup_qr_page.dart';
 
-/// Sticky action bar: CTA konfirmasi + badge garansi.
+/// Sticky action bar untuk mengonfirmasi pesanan.
 class CheckoutBottomBar extends StatelessWidget {
   final int total;
   final VoidCallback? onConfirm;
+  final bool isLoading;
 
   const CheckoutBottomBar({
     super.key,
     required this.total,
     this.onConfirm,
+    this.isLoading = false,
   });
 
-  String get _formattedTotal =>
-      'Rp ${total.toString().replaceAllMapped(
-            RegExp(r'(\d)(?=(\d{3})+$)'),
-            (m) => '${m[1]}.',
-          )}';
+  String get _formattedTotal {
+    return 'Rp ${total.toString().replaceAllMapped(
+          RegExp(r'(\d)(?=(\d{3})+$)'),
+          (m) => '${m[1]}.',
+        )}';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,25 +46,21 @@ class CheckoutBottomBar extends StatelessWidget {
       child: SafeArea(
         top: false,
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // Primary CTA
             GestureDetector(
-              onTap: onConfirm ??
-                  () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const PickupQrPage(),
-                      ),
-                    );
-                  },
-              child: Container(
+              onTap: isLoading ? null : onConfirm,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: double.infinity,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 14,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.ctaGreen,
+                  color: isLoading
+                      ? AppColors.primary.withValues(alpha: 0.6)
+                      : AppColors.ctaGreen,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
@@ -72,61 +71,59 @@ class CheckoutBottomBar extends StatelessWidget {
                   ],
                 ),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Flexible(
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.qr_code_2,
-                            size: 22,
-                            color: AppColors.onPrimary,
-                          ),
-                          const SizedBox(width: 8),
-                          Flexible(
-                            child: Text(
-                              'Konfirmasi & Dapatkan QR Pickup',
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 14,
-                                height: 20 / 14,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.onPrimary,
-                              ),
-                            ),
-                          ),
-                        ],
+                    if (isLoading)
+                      const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.onPrimary,
+                        ),
+                      )
+                    else
+                      const Icon(
+                        Icons.qr_code_2,
+                        size: 22,
+                        color: AppColors.onPrimary,
+                      ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        isLoading
+                            ? 'Menyimpan Pesanan...'
+                            : 'Konfirmasi & Dapatkan QR Pickup',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 14,
+                          height: 20 / 14,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.onPrimary,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Row(
-                      children: [
-                        Text(
-                          _formattedTotal,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 14,
-                            height: 20 / 14,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.onPrimary,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        const Icon(
-                          Icons.arrow_forward,
-                          size: 18,
-                          color: AppColors.onPrimary,
-                        ),
-                      ],
+                    Text(
+                      _formattedTotal,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14,
+                        height: 20 / 14,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.onPrimary,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(
+                      Icons.arrow_forward,
+                      size: 18,
+                      color: AppColors.onPrimary,
                     ),
                   ],
                 ),
               ),
             ),
-
             const SizedBox(height: 10),
-
-            // Security / guarantees badge
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
