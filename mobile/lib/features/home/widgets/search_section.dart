@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:provider/provider.dart';
+
 import '../../../core/theme/app_colors.dart';
+import '../../../providers/food_provider.dart';
 
 class SearchSection extends StatefulWidget {
   const SearchSection({super.key});
@@ -34,6 +37,7 @@ class _SearchSectionState extends State<SearchSection> {
 
   void _clearSearch() {
     _controller.clear();
+    context.read<FoodProvider>().setSearchQuery('');
     setState(() {});
   }
 
@@ -97,9 +101,16 @@ class _SearchSectionState extends State<SearchSection> {
                   isDense: true,
                   contentPadding: EdgeInsets.zero,
                 ),
-                onChanged: (value) => setState(() {}),
+                onChanged: (value) {
+                  context
+                      .read<FoodProvider>()
+                      .setSearchQuery(value);
+                  setState(() {});
+                },
                 onSubmitted: (value) {
-                  // TODO: jalankan pencarian surplus
+                  context
+                      .read<FoodProvider>()
+                      .setSearchQuery(value);
                   _focusNode.unfocus();
                 },
               ),

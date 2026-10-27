@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../providers/food_provider.dart';
 
 class HomeHeader extends StatelessWidget {
   const HomeHeader({super.key});
@@ -21,6 +22,8 @@ class HomeHeader extends StatelessWidget {
         context.watch<AuthProvider>().user?.nama.trim() ?? '';
     final displayName =
         nama.isNotEmpty ? nama : '';
+    final totalProducts =
+        context.watch<FoodProvider>().totalProducts;
 
     return Container(
       color: AppColors.surface,
@@ -108,7 +111,10 @@ class HomeHeader extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Ada 18 makanan surplus siap diselamatkan hari ini.',
+                        totalProducts > 0
+                            ? 'Ada $totalProducts makanan surplus '
+                                'siap diselamatkan hari ini.'
+                            : 'Belum ada makanan surplus hari ini.',
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.plusJakartaSans(

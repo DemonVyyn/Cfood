@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../models/food_model.dart';
-import '../../checkout/checkout_page.dart';
+import '../../food/food_detail_page.dart';
 import '../../../core/constants/app_constants.dart';
 
 class SurplusFoodCard extends StatelessWidget {
@@ -50,59 +50,85 @@ class SurplusFoodCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(food.namaToko),
-                const SizedBox(height: 8),
-                Text(
-                  'Rp ${food.hargaDiskon.toStringAsFixed(0)}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF0CB52A),
-                  ),
-                ),
-                if (food.hargaOriginal > food.hargaDiskon)
-                  Text(
-                    'Rp ${food.hargaOriginal.toStringAsFixed(0)}',
-                    style: const TextStyle(
-                      decoration: TextDecoration.lineThrough,
-                      color: Colors.grey,
-                    ),
-                  ),
-                if (food.persenDiskon > 0)
-                  Text('Diskon ${food.persenDiskon}%'),
                 const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isUnavailable
-                          ? Colors.grey
-                          : const Color(0xFF0CB52A),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Flexible(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Rp ${food.hargaDiskon.toStringAsFixed(0)}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              color: Color(0xFF0CB52A),
+                            ),
+                          ),
+                          if (food.hargaOriginal > food.hargaDiskon)
+                            Text(
+                              'Rp ${food.hargaOriginal.toStringAsFixed(0)}',
+                              style: const TextStyle(
+                                decoration: TextDecoration.lineThrough,
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          if (food.persenDiskon > 0)
+                            Text(
+                              'Diskon ${food.persenDiskon}%',
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                        ],
                       ),
                     ),
-                    onPressed: isUnavailable
-                        ? null
-                        : () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => CheckoutPage(
-                                  food: food,
-                                  quantity: 1,
+                    const SizedBox(width: 8),
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: isUnavailable
+                            ? Colors.grey
+                            : const Color(0xFF0CB52A),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: isUnavailable
+                          ? null
+                          : () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => FoodDetailPage(
+                                    food: food,
+                                  ),
                                 ),
-                              ),
-                            );
-                          },
-                    child: Text(
-                      isUnavailable
-                          ? (food.isExpired
-                              ? 'Kedaluwarsa'
-                              : 'Stok Habis')
-                          : 'Ambil Sekarang',
+                              );
+                            },
+                      icon: const Icon(
+                        Icons.shopping_cart_outlined,
+                        size: 18,
+                      ),
+                      label: Text(
+                        isUnavailable
+                            ? (food.isExpired
+                                ? 'Kedaluwarsa'
+                                : 'Stok Habis')
+                            : 'Ambil Sekarang',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ],
             ),

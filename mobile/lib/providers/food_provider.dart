@@ -56,7 +56,7 @@ class FoodProvider extends ChangeNotifier {
       result = result.where((food) {
         return food.nama.toLowerCase().contains(keyword) ||
             food.namaToko.toLowerCase().contains(keyword) ||
-            food.deskripsi.toLowerCase().contains(keyword);
+            food.kategori.toLowerCase().contains(keyword);
       }).toList();
     }
 
