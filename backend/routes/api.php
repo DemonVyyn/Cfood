@@ -8,40 +8,41 @@ use App\Http\Controllers\Api\OrderController;
 
 /*
 |--------------------------------------------------------------------------
-| Public Routes
+| Public Routes (dengan rate limiting anti brute-force)
 |--------------------------------------------------------------------------
 */
 
 Route::post(
     '/register',
     [AuthController::class, 'register']
-);
+)->middleware('throttle:5,1');
 
 Route::post(
     '/login',
     [AuthController::class, 'login']
-);
+)->middleware('throttle:5,1');
 
 /*
 |--------------------------------------------------------------------------
-| Protected Routes
+| Customer Routes
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth:sanctum')
+Route::middleware(['auth:sanctum', 'role:customer'])
     ->group(function () {
+        Route::post('/orders', [OrderController::class, 'store']);
+        Route::get('/orders', [OrderController::class, 'index']);
+        Route::get('/orders/{id}', [OrderController::class, 'show']);
+    });
 
+/*
+|--------------------------------------------------------------------------
+| Merchant (Mitra) Routes
+|--------------------------------------------------------------------------
+*/
 
-    // Customer: membuat dan melihat pesanan.
-Route::post('/orders', [OrderController::class, 'store']);
-Route::get('/orders', [OrderController::class, 'index']);
-Route::get('/orders/{id}', [OrderController::class, 'show']);
-
-Route::post(
-    '/merchant/orders/{id}/verify-payment',
-    [MerchantController::class, 'verifyPayment']
-);
-
+Route::middleware(['auth:sanctum', 'role:mitra'])
+    ->group(function () {
         Route::get(
             '/merchant/dashboard',
             [MerchantController::class, 'dashboard']
@@ -49,7 +50,61 @@ Route::post(
 
         Route::get(
             '/merchant/products',
-            [MerchantController::class, 'products'] 
+            [MerchantController::class, 'products']
+        );
+
+        Route::post(
+            '/merchant/products',
+            [MerchantController::class, 'storeProduct']
+        );
+
+        Route::get(
+            '/merchant/products/{id}',
+            [MerchantController::class, 'showProduct']
+        );
+
+        Route::put(
+            '/merchant/products/{id}',
+            [MerchantController::class, 'updateProduct']
+        );
+
+        Route::delete(
+            '/merchant/products/{id}',
+            [MerchantController::class, 'deleteProduct']
+        );
+
+        Route::get(
+            '/merchant/orders',
+            [MerchantController::class, 'orders']
+        );
+
+        Route::post(
+            '/merchant/orders/{id}/verify-payment',
+            [MerchantController::class, 'verifyPayment']
+        );
+
+        Route::post(
+            '/merchant/orders/confirm-pickup',
+            [MerchantController::class, 'confirmPickup']
+        );
+    });
+
+/*
+|--------------------------------------------------------------------------
+| Shared Authenticated Routes (Customer & Mitra)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth:sanctum')
+    ->group(function () {
+        Route::get(
+            '/foods',
+            [FoodController::class, 'index']
+        );
+
+        Route::get(
+            '/foods/{id}',
+            [FoodController::class, 'show']
         );
 
         Route::get(
@@ -57,50 +112,8 @@ Route::post(
             [AuthController::class, 'profile']
         );
 
-Route::post(
-    '/merchant/products',
-    [MerchantController::class, 'storeProduct']
-);
-
-Route::get(
-    '/merchant/products/{id}',
-    [MerchantController::class, 'showProduct']
-);
-
-Route::put(
-    '/merchant/products/{id}',
-    [MerchantController::class, 'updateProduct']
-);
-
-Route::delete(
-    '/merchant/products/{id}',
-    [MerchantController::class, 'deleteProduct']
-);
-
-Route::get(
-    '/merchant/orders',
-    [MerchantController::class, 'orders']
-);
-
         Route::post(
             '/logout',
             [AuthController::class, 'logout']
         );
-
-        Route::get(
-    '/foods',
-    [FoodController::class, 'index']
-);
-
-Route::get(
-    '/foods/{id}',
-    [FoodController::class, 'show']
-);
-
-Route::post(
-    '/merchant/orders/confirm-pickup',
-    [MerchantController::class, 'confirmPickup']
-);
     });
-
-    
