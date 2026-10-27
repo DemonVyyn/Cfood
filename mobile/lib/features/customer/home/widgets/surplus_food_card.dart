@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../models/food_model.dart';
-import '../../food/food_detail_page.dart';
-import '../../checkout/checkout_page.dart';
-import '../../../core/constants/app_constants.dart';
+import '../../../../models/food_model.dart';
+import '../../../../features/food/food_detail_page.dart';
+import '../../../../core/constants/app_constants.dart';
 
 class SurplusFoodCard extends StatelessWidget {
   final FoodModel food;
@@ -98,9 +97,8 @@ class SurplusFoodCard extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => CheckoutPage(
+                                  builder: (_) => FoodDetailPage(
                                     food: food,
-                                    quantity: 1,
                                   ),
                                 ),
                               );
