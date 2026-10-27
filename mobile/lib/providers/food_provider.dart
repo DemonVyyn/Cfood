@@ -60,10 +60,10 @@ class FoodProvider extends ChangeNotifier {
       }).toList();
     }
 
-    // Filter kategori.
+    // Filter berdasarkan nama toko.
     if (selectedCategory != 'Semua') {
       result = result.where((food) {
-        return food.kategori.toLowerCase().contains(
+        return food.namaToko.toLowerCase().contains(
               selectedCategory.toLowerCase(),
             );
       }).toList();

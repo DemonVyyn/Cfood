@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../models/merchant_product_model.dart';
 import '../../../../providers/merchant_product_provider.dart';
+import '../../../../core/constants/app_constants.dart';
 
 const Color _primaryGreen = Color(0xFF168348);
 const Color _textColor = Color(0xFF17251D);
@@ -243,7 +244,10 @@ class ProductCard extends StatelessWidget {
   }
 
   Widget _buildProductImage(bool isSoldOut) {
-    final photoUrl = product.photo?.trim() ?? '';
+    final raw = (product.photo ?? '').trim();
+    final photoUrl = raw.isEmpty
+        ? ''
+        : (raw.startsWith('http') ? raw : '${AppConstants.imageBaseUrl}/$raw');
 
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(

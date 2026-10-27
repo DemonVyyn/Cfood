@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../models/food_model.dart';
+import '../../core/constants/app_constants.dart';
 import '../checkout/checkout_page.dart';
 
 class FoodDetailPage extends StatefulWidget {
@@ -192,9 +193,11 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
       children: [
         AspectRatio(
           aspectRatio: 4 / 3,
-          child: _food.foto.isNotEmpty
+          child:         _food.foto.isNotEmpty
               ? Image.network(
-                  _food.foto,
+                  _food.foto.startsWith('http')
+                      ? _food.foto
+                      : '${AppConstants.imageBaseUrl}/${_food.foto}',
                   width: double.infinity,
                   fit: BoxFit.cover,
                   errorBuilder: (_, error, stackTrace) {

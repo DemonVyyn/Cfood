@@ -144,6 +144,17 @@ class _SearchSectionState
         ),
       ),
       builder: (_) {
+        final tokoList = <String>[
+          'Semua',
+          ...context
+              .read<FoodProvider>()
+              .foods
+              .map((f) => f.namaToko)
+              .where((n) => n.isNotEmpty)
+              .toSet()
+              .toList(),
+        ];
+
         return Padding(
           padding:
               const EdgeInsets.all(
@@ -172,14 +183,7 @@ class _SearchSectionState
               Wrap(
                 spacing: 10,
                 runSpacing: 10,
-                children: [
-                  'Semua',
-                  'Bakery',
-                  'Restoran',
-                  'Cafe',
-                  'Hotel',
-                  'Supermarket',
-                ].map((category) {
+                children: tokoList.map((category) {
                   return ChoiceChip(
                     label: Text(
                       category,

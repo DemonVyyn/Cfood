@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../models/food_model.dart';
+import '../../../../core/constants/app_constants.dart';
 import 'checkout_card.dart';
 import 'eco_bag_toggle.dart';
 
@@ -130,9 +131,11 @@ class OrderSummaryCard extends StatelessWidget {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: food.foto.isNotEmpty
+                    child:                   food.foto.isNotEmpty
                         ? Image.network(
-                            food.foto,
+                            food.foto.startsWith('http')
+                                ? food.foto
+                                : '${AppConstants.imageBaseUrl}/${food.foto}',
                             width: 80,
                             height: 80,
                             fit: BoxFit.cover,
