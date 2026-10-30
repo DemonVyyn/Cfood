@@ -6,11 +6,7 @@ use App\Http\Controllers\Api\FoodController;
 use App\Http\Controllers\Api\MerchantController;
 use App\Http\Controllers\Api\OrderController;
 
-/*
-|--------------------------------------------------------------------------
-| Public Routes
-|--------------------------------------------------------------------------
-*/
+/* Public Routes */
 
 Route::post(
     '/register',
@@ -22,11 +18,7 @@ Route::post(
     [AuthController::class, 'login']
 );
 
-/*
-|--------------------------------------------------------------------------
-| Protected Routes
-|--------------------------------------------------------------------------
-*/
+/* Protected Routes */
 
 Route::middleware('auth:sanctum')
     ->group(function () {
