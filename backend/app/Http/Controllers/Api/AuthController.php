@@ -8,6 +8,7 @@ use App\Http\Requests\RegisterRequest;
 use App\Models\User;
 use App\Models\Mitra;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
@@ -15,36 +16,42 @@ class AuthController extends Controller
     public function register(
         RegisterRequest $request
     ) {
-        $user = User::create([
-            'nama' => $request->nama,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'password' => $request->password,
-            'role' => $request->role,
-            'status' => 'active',
-        ]);
-
-        if ($request->role === 'mitra') {
-
-            Mitra::create([
-                'user_id' => $user->id,
-
-                'nama_toko'
-                    => $request->nama_toko,
-
-                'deskripsi_toko'
-                    => $request->deskripsi_toko,
-
-                'alamat'
-                    => $request->alamat,
-
-                'nomor_telepon'
-                    => $request->nomor_telepon_toko,
-
-                'status_verifikasi'
-                    => 'pending',
+        // Transaksi: jika pembuatan data mitra gagal,
+        // pembuatan user ikut di-rollback (commit/rollback).
+        $user = DB::transaction(function () use ($request) {
+            $user = User::create([
+                'nama' => $request->nama,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'password' => $request->password,
+                'role' => $request->role,
+                'status' => 'active',
             ]);
-        }
+
+            if ($request->role === 'mitra') {
+
+                Mitra::create([
+                    'user_id' => $user->id,
+
+                    'nama_toko'
+                        => $request->nama_toko,
+
+                    'deskripsi_toko'
+                        => $request->deskripsi_toko,
+
+                    'alamat'
+                        => $request->alamat,
+
+                    'nomor_telepon'
+                        => $request->nomor_telepon_toko,
+
+                    'status_verifikasi'
+                        => 'pending',
+                ]);
+            }
+
+            return $user;
+        });
 
         return response()->json([
             'success' => true,

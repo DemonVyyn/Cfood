@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\BarangPesanan;
 use App\Models\Menu;
 use App\Models\Pesanan;
 use App\Models\Pembayaran;
@@ -457,6 +458,39 @@ class MerchantController extends Controller
             'mitra_id',
             $mitra->id
         )->findOrFail($id);
+
+        // Barang pesanan ikut terhapus otomatis (ON DELETE CASCADE) saat
+        // produk dihapus. Batalkan pesanan yang masih aktif dan hanya berisi
+        // produk ini, supaya tidak tersisa sebagai pesanan "terkunci" tanpa item.
+        $affectedOrderIds = BarangPesanan::where(
+            'menu_id',
+            $product->id
+        )
+            ->pluck('pesanan_id')
+            ->unique();
+
+        foreach ($affectedOrderIds as $orderId) {
+            $otherItems = BarangPesanan::where(
+                'pesanan_id',
+                $orderId
+            )
+                ->where('menu_id', '!=', $product->id)
+                ->count();
+
+            if ($otherItems > 0) {
+                continue;
+            }
+
+            Pesanan::where('id', $orderId)
+                ->whereIn('order_status', [
+                    'menunggu_pembayaran',
+                    'menunggu',
+                    'diproses',
+                ])
+                ->update([
+                    'order_status' => 'dibatalkan',
+                ]);
+        }
 
         if ($product->foto) {
             Storage::disk('public')

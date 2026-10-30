@@ -12,8 +12,7 @@ class MerchantDashboardPage extends StatefulWidget {
   const MerchantDashboardPage({super.key});
 
   @override
-  State<MerchantDashboardPage> createState() =>
-      _MerchantDashboardPageState();
+  State<MerchantDashboardPage> createState() => _MerchantDashboardPageState();
 }
 
 class _MerchantDashboardPageState extends State<MerchantDashboardPage> {
@@ -46,180 +45,164 @@ class _MerchantDashboardPageState extends State<MerchantDashboardPage> {
       backgroundColor: backgroundColor,
       body: SafeArea(
         child: provider.isLoading && data == null
-            ? const Center(
-                child: CircularProgressIndicator(
-                  color: darkGreen,
+            ? const Center(child: CircularProgressIndicator(color: darkGreen))
+            : data == null
+            ? Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.cloud_off_outlined,
+                        size: 48,
+                        color: Colors.grey.shade400,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        provider.error ?? 'Data dashboard tidak tersedia',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: textColor, fontSize: 14),
+                      ),
+                    ],
+                  ),
                 ),
               )
-            : data == null
-                ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
+            : RefreshIndicator(
+                color: darkGreen,
+                onRefresh: refreshDashboard,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      MerchantHeader(
+                        storeName: data.storeName,
+                        location: locationProvider.locationName,
+                        notificationCount: 3,
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      const Text(
+                        'Ringkasan Hari Ini',
+                        style: TextStyle(
+                          fontSize: 23,
+                          fontWeight: FontWeight.bold,
+                          color: textColor,
+                        ),
+                      ),
+
+                      const SizedBox(height: 6),
+
+                      Text(
+                        'Pantau aktivitas dan performa tokomu.',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+
+                      const SizedBox(height: 18),
+
+                      GridView(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 12,
+                              mainAxisExtent:
+                                  150, // tinggi tetap, cukup untuk semua konten
+                            ),
                         children: [
-                          Icon(
-                            Icons.cloud_off_outlined,
-                            size: 48,
-                            color: Colors.grey.shade400,
+                          _buildStatCard(
+                            title: 'Produk Aktif',
+                            value: '${data.activeProducts}',
+                            icon: Icons.fastfood_rounded,
+                            color: darkGreen,
                           ),
-                          const SizedBox(height: 12),
-                          Text(
-                            provider.error ??
-                                'Data dashboard tidak tersedia',
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: textColor,
-                              fontSize: 14,
+                          _buildStatCard(
+                            title: 'Pesanan Menunggu',
+                            value: '${data.waitingOrders}',
+                            icon: Icons.receipt_long_rounded,
+                            color: Colors.orange,
+                          ),
+                          _buildStatCard(
+                            title: 'Penjualan Hari Ini',
+                            value: 'Rp ${data.todaySales.toStringAsFixed(0)}',
+                            icon: Icons.payments_rounded,
+                            color: Colors.blue,
+                          ),
+                          _buildStatCard(
+                            title: 'Food Saved',
+                            value: '${data.activeProducts}',
+                            icon: Icons.eco_rounded,
+                            color: Colors.teal,
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 22),
+
+                      const MerchantActionButton(),
+
+                      const SizedBox(height: 28),
+
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Expanded(
+                            child: Text(
+                              'Pesanan Masuk',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: textColor,
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/merchant-orders');
+                            },
+                            style: TextButton.styleFrom(
+                              foregroundColor: darkGreen,
+                            ),
+                            child: const Text(
+                              'Lihat Semua',
+                              style: TextStyle(fontWeight: FontWeight.w600),
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  )
-                : RefreshIndicator(
-                    color: darkGreen,
-                    onRefresh: refreshDashboard,
-                    child: SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          MerchantHeader(
-                            storeName: data.storeName,
-                            location: locationProvider.locationName,
-                            notificationCount: 3,
-                          ),
 
-                          const SizedBox(height: 24),
+                      const SizedBox(height: 8),
 
-                          const Text(
-                            'Ringkasan Hari Ini',
-                            style: TextStyle(
-                              fontSize: 23,
-                              fontWeight: FontWeight.bold,
-                              color: textColor,
-                            ),
-                          ),
+                      PickupOrderCard(orders: data.latestOrders),
 
-                          const SizedBox(height: 6),
+                      const SizedBox(height: 28),
 
-                          Text(
-                            'Pantau aktivitas dan performa tokomu.',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey.shade600,
-                            ),
-                          ),
-
-                          const SizedBox(height: 18),
-
-                          GridView.count(
-                            shrinkWrap: true,
-                            physics:
-                                const NeverScrollableScrollPhysics(),
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
-                            childAspectRatio: 1.32,
-                            children: [
-                              _buildStatCard(
-                                title: 'Produk Aktif',
-                                value: '${data.activeProducts}',
-                                icon: Icons.fastfood_rounded,
-                                color: darkGreen,
-                              ),
-                              _buildStatCard(
-                                title: 'Pesanan Menunggu',
-                                value: '${data.waitingOrders}',
-                                icon: Icons.receipt_long_rounded,
-                                color: Colors.orange,
-                              ),
-                              _buildStatCard(
-                                title: 'Penjualan Hari Ini',
-                                value:
-                                    'Rp ${data.todaySales.toStringAsFixed(0)}',
-                                icon: Icons.payments_rounded,
-                                color: Colors.blue,
-                              ),
-                              _buildStatCard(
-                                title: 'Food Saved',
-                                value: '${data.activeProducts}',
-                                icon: Icons.eco_rounded,
-                                color: Colors.teal,
-                              ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 22),
-
-                          const MerchantActionButton(),
-
-                          const SizedBox(height: 28),
-
-                          Row(
-                            mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Expanded(
-                                child: Text(
-                                  'Pesanan Masuk',
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: textColor,
-                                  ),
-                                ),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pushNamed(
-                                    context,
-                                    '/merchant-orders',
-                                  );
-                                },
-                                style: TextButton.styleFrom(
-                                  foregroundColor: darkGreen,
-                                ),
-                                child: const Text(
-                                  'Lihat Semua',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 8),
-
-                          PickupOrderCard(
-                            orders: data.latestOrders,
-                          ),
-
-                          const SizedBox(height: 28),
-
-                          const Text(
-                            'Stok Surplus Hari Ini',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: textColor,
-                            ),
-                          ),
-
-                          const SizedBox(height: 12),
-
-                          StockItemCard(
-                            stocks: data.stocks,
-                          ),
-
-                          const SizedBox(height: 24),
-                        ],
+                      const Text(
+                        'Stok Surplus Hari Ini',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: textColor,
+                        ),
                       ),
-                    ),
+
+                      const SizedBox(height: 12),
+
+                      StockItemCard(stocks: data.stocks),
+
+                      const SizedBox(height: 24),
+                    ],
                   ),
+                ),
+              ),
       ),
     );
   }
@@ -235,9 +218,7 @@ class _MerchantDashboardPageState extends State<MerchantDashboardPage> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: Colors.grey.shade200,
-        ),
+        border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.035),
@@ -257,11 +238,7 @@ class _MerchantDashboardPageState extends State<MerchantDashboardPage> {
               color: color.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(13),
             ),
-            child: Icon(
-              icon,
-              color: color,
-              size: 23,
-            ),
+            child: Icon(icon, color: color, size: 23),
           ),
 
           const SizedBox(height: 12),

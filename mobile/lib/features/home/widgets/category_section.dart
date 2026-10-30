@@ -39,8 +39,7 @@ class CategorySection extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) =>
-                          const AllCategoriesPage(),
+                      builder: (_) => AllCategoriesPage(),
                     ),
                   );
                 },
@@ -91,7 +90,12 @@ class _CategoryItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // TODO: filter surplus berdasarkan kategori
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => AllCategoriesPage(selected: category),
+          ),
+        );
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

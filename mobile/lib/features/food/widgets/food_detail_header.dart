@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../models/food_model.dart';
+import '../../../core/constants/app_constants.dart';
 
 class FoodDetailHeader extends StatelessWidget {
   final FoodModel food;
@@ -15,7 +16,7 @@ class FoodDetailHeader extends StatelessWidget {
       return food.foto;
     }
 
-    return 'http://10.0.2.2:8000/storage/${food.foto}';
+    return '${AppConstants.imageBaseUrl}/${food.foto}';
   }
 
   @override

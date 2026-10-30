@@ -23,6 +23,13 @@ class Mitra extends Model
         'status_verifikasi',
     ];
 
+    // Enkripsi data sensitif toko (AES-256-CBC via APP_KEY).
+    // Laravel otomatis mengenkripsi saat write dan mendekripsi saat read.
+    protected $casts = [
+        'alamat' => 'encrypted',
+        'nomor_telepon' => 'encrypted',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);

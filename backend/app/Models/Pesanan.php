@@ -44,8 +44,4 @@ class Pesanan extends Model
         return $this->hasOne(Pembayaran::class);
     }
 
-    public function review()
-    {
-        return $this->hasOne(Review::class);
-    }
 }

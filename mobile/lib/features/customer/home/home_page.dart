@@ -26,17 +26,6 @@ class _HomePageState
     extends State<HomePage> {
   bool loaded = false;
 
-  String selectedCategory = 'Semua';
-
-  final List<String> categories = const [
-    'Semua',
-    'Bakery',
-    'Restoran',
-    'Cafe',
-    'Hotel',
-    'Supermarket',
-  ];
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -60,6 +49,15 @@ class _HomePageState
         context.watch<FoodProvider>();
 
     final foods = provider.foods;
+
+    final tokoList = <String>[
+      'Semua',
+      ...provider.foods
+          .map((f) => f.namaToko)
+          .where((n) => n.isNotEmpty)
+          .toSet()
+          .toList(),
+    ];
 
     final totalProducts =
         foods.length;
@@ -143,15 +141,14 @@ class _HomePageState
 
                 CategorySection(
                   categories:
-                      categories,
+                      tokoList,
                   selectedCategory:
-                      selectedCategory,
+                      provider.selectedCategory,
                   onSelected:
                       (category) {
-                    setState(() {
-                      selectedCategory =
-                          category;
-                    });
+                    provider.setCategory(
+                      category,
+                    );
                   },
                 ),
 

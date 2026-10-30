@@ -1,4 +1,4 @@
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class StorageService {
   static const _storage = FlutterSecureStorage();
@@ -51,5 +51,35 @@ class StorageService {
     await _storage.delete(
       key: _profilePhotoKey,
     );
+  }
+
+  // ---------- PESANAN YANG SUDAH DI-POPUP ----------
+
+  static const _acknowledgedOrdersKey =
+      'acknowledged_orders';
+
+  /// Simpan daftar ID pesanan yang sudah di-popup konfirmasi
+  /// agar tidak muncul berulang.
+  static Future<void> saveAcknowledgedOrders(
+    List<int> ids,
+  ) async {
+    await _storage.write(
+      key: _acknowledgedOrdersKey,
+      value: ids.join(','),
+    );
+  }
+
+  /// Ambil daftar ID pesanan yang sudah di-popup konfirmasi.
+  static Future<List<int>> getAcknowledgedOrders() async {
+    final raw = await _storage.read(
+      key: _acknowledgedOrdersKey,
+    );
+    if (raw == null || raw.isEmpty) return const [];
+    return raw
+        .split(',')
+        .where((e) => e.trim().isNotEmpty)
+        .map((e) => int.tryParse(e.trim()) ?? -1)
+        .where((e) => e != -1)
+        .toList();
   }
 }
