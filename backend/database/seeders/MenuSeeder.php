@@ -10,10 +10,19 @@ class MenuSeeder extends Seeder
 {
     public function run(): void
     {
-        $mitra = Mitra::all();
+        // Mengambil seluruh Mitra yang tersedia
+        $mitra = Mitra::orderBy('id')->get();
+
+        // Pastikan terdapat minimal satu Mitra
+        if ($mitra->isEmpty()) {
+            $this->command->warn(
+                'MenuSeeder dilewati karena belum ada data Mitra.'
+            );
+
+            return;
+        }
 
         $products = [
-
             [
                 'nama' => 'Mystery Bread Box',
                 'harga_original' => 50000,
@@ -68,39 +77,36 @@ class MenuSeeder extends Seeder
 
         foreach ($products as $index => $item) {
 
-            Menu::create([
-                'mitra_id' =>
-                    $mitra[$index % 3]->id,
+            // Membagikan produk ke Mitra yang tersedia
+            $selectedMitra = $mitra[$index % $mitra->count()];
 
-                'nama' =>
-                    $item['nama'],
+            Menu::create([
+                'mitra_id' => $selectedMitra->id,
+
+                'nama' => $item['nama'],
 
                 'deskripsi' =>
                     'Paket makanan surplus berkualitas yang masih layak konsumsi.',
 
-                'kategori' =>
-                    'Mystery Box',
+                'kategori' => 'Mystery Box',
 
-                'foto' =>
-                    'https://picsum.photos/400/300',
+                'foto' => 'https://picsum.photos/400/300',
 
-                'harga_original' =>
-                    $item['harga_original'],
+                'harga_original' => $item['harga_original'],
 
-                'harga_diskon' =>
-                    $item['harga_diskon'],
+                'harga_diskon' => $item['harga_diskon'],
 
-                'stok' =>
-                    rand(3, 15),
+                'stok' => rand(3, 15),
 
-                'waktu_expired' =>
-                    now()->addHours(
-                        rand(6, 24)
-                    ),
+                'waktu_expired' => now()->addHours(rand(6, 24)),
 
-                'status' =>
-                    'aktif',
+                'status' => 'aktif',
             ]);
         }
+
+        $this->command->info(
+            count($products) . ' produk berhasil dibuat untuk ' .
+            $mitra->count() . ' Mitra.'
+        );
     }
 }

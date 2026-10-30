@@ -11,144 +11,53 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        User::firstOrCreate(
-            ['email' => 'admin@mealio.com'],
+        // CUSTOMER
+        User::updateOrCreate(
+            ['email' => 's@gmail.com'],
             [
-                'nama' => 'Admin Mealio',
+                'nama' => 'S Customer',
                 'phone' => '081111111111',
-                'password' => Hash::make('password'),
-                'role' => 'admin',
+                'password' => Hash::make('tama1234'),
+                'role' => 'customer',
                 'status' => 'active',
             ]
         );
 
-        User::firstOrCreate(
-            ['email' => 'avnes@gmail.com'],
+        // MITRA
+        $mitra = User::updateOrCreate(
+            ['email' => 'a@gmail.com'],
             [
-                'nama' => 'Avnes Pratama',
+                'nama' => 'A Mitra',
                 'phone' => '082222222222',
-                'password' => Hash::make('password'),
-                'role' => 'customer',
-                'status' => 'active',
-            ]
-        );
-
-        User::firstOrCreate(
-            ['email' => 'arifin@gmail.com'],
-            [
-                'nama' => 'Muhammad Arifin',
-                'phone' => '083333333333',
-                'password' => Hash::make('arifin123'),
-                'role' => 'customer',
-                'status' => 'active',
-            ]
-        );
-
-        User::firstOrCreate(
-            ['email' => 'risky@gmail.com'],
-            [
-                'nama' => 'Muhammad Risky',
-                'phone' => '088888888888',
-                'password' => Hash::make('risky123'),
-                'role' => 'customer',
-                'status' => 'active',
-            ]
-        );
-
-        User::firstOrCreate(
-            ['email' => 'radja@gmail.com'],
-            [
-                'nama' => 'Muhammad Radja',
-                'phone' => '089999999999',
-                'password' => Hash::make('radja123'),
-                'role' => 'customer',
-                'status' => 'active',
-            ]
-        );
-
-        User::firstOrCreate(
-            ['email' => 'naila@gmail.com'],
-            [
-                'nama' => 'Naila Putri',
-                'phone' => '089999999990',
-                'password' => Hash::make('naila123'),
-                'role' => 'customer',
-                'status' => 'active',
-            ]
-        );
-
-        $mitra1 = User::updateOrCreate(
-            ['email' => 'bakery@gmail.com'],
-            [
-                'nama' => 'Bakery Bahagia',
-                'phone' => '084444444444',
-                'password' => Hash::make('bakery123'),
+                'password' => Hash::make('tama1234'),
                 'role' => 'mitra',
                 'status' => 'active',
             ]
         );
 
-        $mitra2 = User::updateOrCreate(
-            ['email' => 'coffee@gmail.com'],
+        // DATA PROFIL MITRA
+        Mitra::updateOrCreate(
+            ['user_id' => $mitra->id],
             [
-                'nama' => 'Coffee Corner',
-                'phone' => '085555555555',
-                'password' => Hash::make('coffee123'),
-                'role' => 'mitra',
-                'status' => 'active',
-            ]
-        );
-
-        $mitra3 = User::updateOrCreate(
-            ['email' => 'hotel@gmail.com'],
-            [
-                'nama' => 'Hotel Harmoni',
-                'phone' => '086666666666',
-                'password' => Hash::make('hotel123'),
-                'role' => 'mitra',
-                'status' => 'active',
-            ]
-        );
-
-        Mitra::firstOrCreate(
-            ['user_id' => $mitra1->id],
-            [
-                'nama_toko' => 'Bakery Bahagia',
-                'deskripsi_toko' =>
-                    'Menjual roti, pastry, dan bakery surplus berkualitas.',
+                'nama_toko' => 'Mitra CFood',
+                'deskripsi_toko' => 'Mitra penjual makanan surplus untuk mengurangi food waste.',
                 'alamat' => 'Batam Center',
                 'latitude' => 1.1300000,
                 'longitude' => 104.0500000,
-                'nomor_telepon' => '084444444444',
+                'nomor_telepon' => '082222222222',
                 'status_verifikasi' => 'verified',
             ]
         );
 
-        Mitra::firstOrCreate(
-            ['user_id' => $mitra2->id],
+        // ADMIN
+        User::updateOrCreate(
+            ['email' => 'd@gmail.com'],
             [
-                'nama_toko' => 'Coffee Corner',
-                'deskripsi_toko' =>
-                    'Menyediakan kopi, snack, dan makanan ringan surplus.',
-                'alamat' => 'Nagoya',
-                'latitude' => 1.1450000,
-                'longitude' => 104.0120000,
-                'nomor_telepon' => '085555555555',
-                'status_verifikasi' => 'verified',
-            ]
-        );
-
-        Mitra::firstOrCreate(
-            ['user_id' => $mitra3->id],
-            [
-                'nama_toko' => 'Hotel Harmoni',
-                'deskripsi_toko' =>
-                    'Buffet hotel dan makanan siap saji surplus.',
-                'alamat' => 'Batam Kota',
-                'latitude' => 1.1100000,
-                'longitude' => 104.0600000,
-                'nomor_telepon' => '086666666666',
-                'status_verifikasi' => 'verified',
+                'nama' => 'D Admin',
+                'phone' => '083333333333',
+                'password' => Hash::make('tama1234'),
+                'role' => 'admin',
+                'status' => 'active',
             ]
         );
     }
