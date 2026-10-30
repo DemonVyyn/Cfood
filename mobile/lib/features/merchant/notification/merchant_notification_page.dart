@@ -1,131 +1,314 @@
 import 'package:flutter/material.dart';
 
-class MerchantNotificationPage extends StatelessWidget {
+import '../../../core/storage/storage_service.dart';
+import '../../../models/notification_model.dart';
+import '../../../services/notification_service.dart';
+
+import 'notification_detail_page.dart';
+import '../notification/widget/notification_card.dart';
+import '../notification/widget/notification_state_view.dart';
+import '../notification/widget/notification_summary.dart';
+
+class MerchantNotificationPage extends StatefulWidget {
   const MerchantNotificationPage({super.key});
 
-  static const Color primaryGreen = Color(0xFF14DE32);
-  static const Color darkGreen = Color(0xFF0CB52A);
-  static const Color backgroundColor = Color(0xFFF7F9F7);
-  static const Color textColor = Color(0xFF263126);
+  @override
+  State<MerchantNotificationPage> createState() =>
+      _MerchantNotificationPageState();
+}
+
+class _MerchantNotificationPageState
+    extends State<MerchantNotificationPage> {
+  final NotificationService _notificationService =
+      NotificationService();
+
+  List<NotificationModel> _notifications = [];
+
+  bool _isLoading = true;
+  bool _isMarkingAll = false;
+  String? _errorMessage;
+
+  int get _unreadCount =>
+      _notifications.where((notification) => !notification.isRead).length;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNotifications();
+  }
+
+  Future<String> _getToken() async {
+    final token = await StorageService.getToken();
+
+    if (token == null || token.isEmpty) {
+      throw Exception(
+        'Sesi login tidak ditemukan. Silakan login kembali.',
+      );
+    }
+
+    return token;
+  }
+
+  Future<void> _loadNotifications() async {
+    if (!mounted) return;
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final token = await _getToken();
+
+      final result =
+          await _notificationService.getNotifications(token);
+
+      if (!mounted) return;
+
+      setState(() {
+        _notifications = result;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _errorMessage = e.toString();
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _markAsRead(NotificationModel notification) async {
+    if (notification.isRead) return;
+
+    final index = _notifications.indexWhere(
+      (item) => item.id == notification.id,
+    );
+
+    if (index == -1) return;
+
+    try {
+      final token = await _getToken();
+
+      await _notificationService.markAsRead(
+        token: token,
+        notificationId: notification.id,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        final oldNotification = _notifications[index];
+
+        _notifications[index] = NotificationModel(
+          id: oldNotification.id,
+          title: oldNotification.title,
+          message: oldNotification.message,
+          isRead: true,
+          createdAt: oldNotification.createdAt,
+          readAt: DateTime.now(),
+        );
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal memperbarui notifikasi: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+
+      rethrow;
+    }
+  }
+
+  Future<void> _openNotification(
+    NotificationModel notification,
+  ) async {
+    try {
+      await _markAsRead(notification);
+
+      if (!mounted) return;
+
+      final updatedNotification = _notifications.firstWhere(
+        (item) => item.id == notification.id,
+      );
+
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => NotificationDetailPage(
+            notification: updatedNotification,
+          ),
+        ),
+      );
+    } catch (_) {
+      // Halaman rincian tidak dibuka jika status baca gagal disimpan.
+    }
+  }
+
+  Future<void> _markAllAsRead() async {
+    if (_unreadCount == 0 || _isMarkingAll) return;
+
+    setState(() {
+      _isMarkingAll = true;
+    });
+
+    try {
+      final token = await _getToken();
+
+      await _notificationService.markAllAsRead(token);
+
+      if (!mounted) return;
+
+      setState(() {
+        _notifications = _notifications.map((notification) {
+          if (notification.isRead) return notification;
+
+          return NotificationModel(
+            id: notification.id,
+            title: notification.title,
+            message: notification.message,
+            isRead: true,
+            createdAt: notification.createdAt,
+            readAt: DateTime.now(),
+          );
+        }).toList();
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Semua notifikasi sudah dibaca.'),
+          backgroundColor: Color(0xFF198754),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal memperbarui notifikasi: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isMarkingAll = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    const primaryColor = Color(0xFF198754);
+
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: const Color(0xFFF7F9F8),
       appBar: AppBar(
-        backgroundColor: backgroundColor,
-        foregroundColor: textColor,
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF26352C),
         elevation: 0,
-        centerTitle: false,
         title: const Text(
           'Notifikasi',
           style: TextStyle(
-            fontSize: 22,
+            fontSize: 19,
             fontWeight: FontWeight.bold,
-            color: textColor,
           ),
         ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-        children: [
-          _buildNotificationCard(
-            icon: Icons.shopping_bag_rounded,
-            iconColor: darkGreen,
-            title: 'Pesanan Baru',
-            message: 'Ada pesanan baru yang masuk',
-          ),
-          const SizedBox(height: 12),
-          _buildNotificationCard(
-            icon: Icons.warning_amber_rounded,
-            iconColor: Colors.orange.shade700,
-            title: 'Stok Hampir Habis',
-            message: 'Nasi Goreng tinggal 2 porsi',
-          ),
-          const SizedBox(height: 12),
-          _buildNotificationCard(
-            icon: Icons.restaurant_rounded,
-            iconColor: Colors.red.shade600,
-            title: 'Produk Expired Hari Ini',
-            message: 'Roti Coklat expired pukul 22:00',
-          ),
-          const SizedBox(height: 12),
-          _buildNotificationCard(
-            icon: Icons.check_circle_rounded,
-            iconColor: darkGreen,
-            title: 'Pickup Berhasil',
-            message: 'Pesanan #123 selesai',
-          ),
+        actions: [
+          if (_unreadCount > 0)
+            TextButton(
+              onPressed: _isMarkingAll ? null : _markAllAsRead,
+              child: _isMarkingAll
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: primaryColor,
+                      ),
+                    )
+                  : const Text(
+                      'Baca semua',
+                      style: TextStyle(
+                        color: primaryColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+            ),
+          const SizedBox(width: 8),
         ],
+      ),
+      body: RefreshIndicator(
+        onRefresh: _loadNotifications,
+        color: primaryColor,
+        child: _buildBody(),
       ),
     );
   }
 
-  Widget _buildNotificationCard({
-    required IconData icon,
-    required Color iconColor,
-    required String title,
-    required String message,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.grey.shade200,
+  Widget _buildBody() {
+    if (_isLoading && _notifications.isEmpty) {
+      return const Center(
+        child: CircularProgressIndicator(
+          color: Color(0xFF198754),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
+      );
+    }
+
+    if (_errorMessage != null && _notifications.isEmpty) {
+      return NotificationStateView(
+        icon: Icons.wifi_off_rounded,
+        title: 'Tidak dapat memuat notifikasi',
+        message: _errorMessage!,
+        onRetry: _loadNotifications,
+      );
+    }
+
+    if (_notifications.isEmpty) {
+      return const NotificationStateView(
+        icon: Icons.notifications_none_rounded,
+        title: 'Belum ada notifikasi',
+        message:
+            'Notifikasi terbaru dari aktivitas toko akan muncul di sini.',
+      );
+    }
+
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(16),
+      children: [
+        NotificationSummary(
+          unreadCount: _unreadCount,
+        ),
+        const SizedBox(height: 22),
+        const Text(
+          'Aktivitas Terbaru',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF26352C),
           ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 46,
-            height: 46,
-            decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(
-              icon,
-              color: iconColor,
-              size: 24,
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: textColor,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  message,
-                  style: TextStyle(
-                    fontSize: 13,
-                    height: 1.4,
-                    color: Colors.grey.shade600,
-                  ),
-                ),
-              ],
+        ),
+        const SizedBox(height: 13),
+        ..._notifications.map(
+          (notification) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: NotificationCard(
+              notification: notification,
+              onTap: () => _openNotification(notification),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

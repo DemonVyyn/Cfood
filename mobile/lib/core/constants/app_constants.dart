@@ -17,6 +17,6 @@ class AppConstants {
   /// Diambil dari [baseUrl] dengan menghilangkan '/api' lalu menambah '/storage'.
   /// Contoh: http://10.0.2.2:8000/storage
   static String get imageBaseUrl {
-    return baseUrl.replaceFirst(RegExp(r'/api$'), '') + '/storage';
+    return '${baseUrl.replaceFirst(RegExp(r'/api$'), '')}/storage';
   }
 }

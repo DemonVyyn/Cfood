@@ -7,6 +7,8 @@ use App\Models\BarangPesanan;
 use App\Models\Menu;
 use App\Models\Pesanan;
 use App\Models\Pembayaran;
+use App\Models\Notifikasi;
+use App\Models\Mitra;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -15,7 +17,8 @@ use Illuminate\Validation\ValidationException;
 class OrderController extends Controller
 {
     /**
-     * Membuat pesanan baru, detail pesanan, dan pembayaran tunai.
+     * Membuat pesanan baru, detail pesanan, pembayaran tunai,
+     * dan notifikasi untuk Mitra.
      */
     public function store(Request $request)
     {
@@ -35,6 +38,7 @@ class OrderController extends Controller
         }
 
         $order = DB::transaction(function () use ($validated, $customer) {
+
             $menu = Menu::whereKey($validated['menu_id'])
                 ->lockForUpdate()
                 ->firstOrFail();
@@ -69,6 +73,7 @@ class OrderController extends Controller
             // Token unik untuk kode QR pengambilan.
             $kodePengambilan = Str::random(20);
 
+            // Simpan pesanan.
             $pesanan = Pesanan::create([
                 'customer_id' => $customer->id,
                 'mitra_id' => $menu->mitra_id,
@@ -77,6 +82,7 @@ class OrderController extends Controller
                 'order_status' => 'menunggu_pembayaran',
             ]);
 
+            // Simpan detail pesanan.
             BarangPesanan::create([
                 'pesanan_id' => $pesanan->id,
                 'menu_id' => $menu->id,
@@ -105,6 +111,25 @@ class OrderController extends Controller
             }
 
             $menu->save();
+
+            /*
+             * Buat notifikasi untuk akun Mitra.
+             * pesanan.mitra_id mengarah ke tabel mitra,
+             * sedangkan notifikasi.user_id menggunakan ID users.
+             */
+            $mitra = Mitra::findOrFail($menu->mitra_id);
+
+            Notifikasi::create([
+                'user_id' => $mitra->user_id,
+                'judul' => 'Pesanan Baru Masuk',
+                'pesan' => 'Pesanan baru #' . $pesanan->id
+                    . ' dari ' . $customer->nama
+                    . ' telah masuk. Jumlah pesanan: '
+                    . $jumlah
+                    . '. Silakan periksa pesanan dan pembayaran.',
+                'is_read' => false,
+                'read_at' => null,
+            ]);
 
             return $pesanan->load([
                 'items.menu',

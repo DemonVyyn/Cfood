@@ -47,7 +47,7 @@ class AppRoutes {
 
     // Merchant: notifikasi
     '/merchant-notifications': (_) =>
-        const MerchantNotificationPage(),
+      const MerchantNotificationPage(),
   };
 
   static Route<dynamic>? onGenerateRoute(

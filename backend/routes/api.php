@@ -1,61 +1,64 @@
+
 <?php
 
-use App\Http\Controllers\Api\AuthController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\FoodController;
 use App\Http\Controllers\Api\MerchantController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\NotificationController;
 
-<<<<<<< HEAD
-/* Public Routes */
-=======
 /*
 |--------------------------------------------------------------------------
-| Public Routes (dengan rate limiting anti brute-force)
+| Public Routes
 |--------------------------------------------------------------------------
+| Route yang dapat diakses tanpa login.
+| Menggunakan rate limiting untuk mencegah brute-force attack.
 */
->>>>>>> 7a3d41155f5a2b7d7dae84d23b00afebb2676bbc
 
-Route::post(
-    '/register',
-    [AuthController::class, 'register']
-)->middleware('throttle:5,1');
+Route::post('/register', [AuthController::class, 'register'])
+    ->middleware('throttle:5,1');
 
-Route::post(
-    '/login',
-    [AuthController::class, 'login']
-)->middleware('throttle:5,1');
+Route::post('/login', [AuthController::class, 'login'])
+    ->middleware('throttle:5,1');
 
-<<<<<<< HEAD
-/* Protected Routes */
-=======
+
 /*
 |--------------------------------------------------------------------------
 | Customer Routes
 |--------------------------------------------------------------------------
+| Hanya dapat diakses oleh pengguna dengan role customer.
 */
->>>>>>> 7a3d41155f5a2b7d7dae84d23b00afebb2676bbc
 
 Route::middleware(['auth:sanctum', 'role:customer'])
     ->group(function () {
+
         Route::post('/orders', [OrderController::class, 'store']);
+
         Route::get('/orders', [OrderController::class, 'index']);
+
         Route::get('/orders/{id}', [OrderController::class, 'show']);
+
     });
+
 
 /*
 |--------------------------------------------------------------------------
 | Merchant (Mitra) Routes
 |--------------------------------------------------------------------------
+| Hanya dapat diakses oleh pengguna dengan role mitra.
 */
 
 Route::middleware(['auth:sanctum', 'role:mitra'])
     ->group(function () {
+
+        // Dashboard Mitra
         Route::get(
             '/merchant/dashboard',
             [MerchantController::class, 'dashboard']
         );
 
+        // Product Management (CRUD)
         Route::get(
             '/merchant/products',
             [MerchantController::class, 'products']
@@ -81,47 +84,63 @@ Route::middleware(['auth:sanctum', 'role:mitra'])
             [MerchantController::class, 'deleteProduct']
         );
 
+        // Order Management
         Route::get(
             '/merchant/orders',
             [MerchantController::class, 'orders']
         );
 
+        // Verifikasi Pembayaran
         Route::post(
             '/merchant/orders/{id}/verify-payment',
             [MerchantController::class, 'verifyPayment']
         );
 
+        // Konfirmasi Pengambilan Pesanan
         Route::post(
             '/merchant/orders/confirm-pickup',
             [MerchantController::class, 'confirmPickup']
         );
+
+        // Notification Management
+        Route::get(
+            '/merchant/notifications',
+            [NotificationController::class, 'index']
+        );
+
+        Route::patch(
+            '/merchant/notifications/{id}/read',
+            [NotificationController::class, 'markAsRead']
+        );
+
+        Route::patch(
+            '/merchant/notifications/read-all',
+            [NotificationController::class, 'markAllAsRead']
+        );
+
     });
+
 
 /*
 |--------------------------------------------------------------------------
 | Shared Authenticated Routes (Customer & Mitra)
 |--------------------------------------------------------------------------
+| Route yang hanya dapat diakses oleh pengguna yang sudah login.
 */
 
 Route::middleware('auth:sanctum')
     ->group(function () {
-        Route::get(
-            '/foods',
-            [FoodController::class, 'index']
-        );
 
-        Route::get(
-            '/foods/{id}',
-            [FoodController::class, 'show']
-        );
+        // Food List
+        Route::get('/foods', [FoodController::class, 'index']);
 
-        Route::get(
-            '/profile',
-            [AuthController::class, 'profile']
-        );
+        // Food Detail
+        Route::get('/foods/{id}', [FoodController::class, 'show']);
 
-        Route::post(
-            '/logout',
-            [AuthController::class, 'logout']
-        );
+        // User Profile
+        Route::get('/profile', [AuthController::class, 'profile']);
+
+        // Logout
+        Route::post('/logout', [AuthController::class, 'logout']);
+
     });

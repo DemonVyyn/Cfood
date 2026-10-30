@@ -135,7 +135,7 @@ class _SearchSectionState extends State<SearchSection> {
             // Filter option (bisa diklik)
             GestureDetector(
               onTap: () {
-                // TODO: buka halaman filter
+                
               },
               child: Container(
                 width: 32,
