@@ -6,6 +6,8 @@ use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\AdminMitraController;
+use App\Http\Controllers\Admin\AdminProductController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,7 +46,7 @@ Route::middleware(['auth', 'role:admin'])
 
         Route::get('/dashboard', [DashboardController::class, 'index'])
             ->name('dashboard');
-            
+
         // Manajemen Pengguna
         Route::get('/users', [UserController::class, 'index'])
             ->name('users.index');
@@ -60,6 +62,35 @@ Route::middleware(['auth', 'role:admin'])
 
         Route::put('/users/{user}', [AdminUserController::class, 'update'])
             ->name('users.update');
+
+        // Manajemen dan Verifikasi Mitra
+        Route::get('/mitra', [AdminMitraController::class, 'index'])
+            ->name('mitra.index');
+
+        Route::get('/mitra/{mitra}', [AdminMitraController::class, 'show'])
+            ->name('mitra.show');
+
+        Route::patch('/mitra/{mitra}/verify', [AdminMitraController::class, 'verify'])
+            ->name('mitra.verify');
+
+        Route::patch('/mitra/{mitra}/reject', [AdminMitraController::class, 'reject'])
+            ->name('mitra.reject');
+
+        // Manajemen Produk
+        Route::get('/products', [AdminProductController::class, 'index'])
+            ->name('products.index');
+
+        Route::get('/products/{product}', [AdminProductController::class, 'show'])
+            ->name('products.show');
+
+        Route::get('/products/{product}/edit', [AdminProductController::class, 'edit'])
+            ->name('products.edit');
+
+        Route::put('/products/{product}', [AdminProductController::class, 'update'])
+            ->name('products.update');
+
+        Route::delete('/products/{product}', [AdminProductController::class, 'destroy'])
+            ->name('products.destroy');
 
         Route::post('/logout', [AdminAuthController::class, 'logout'])
             ->name('logout');
