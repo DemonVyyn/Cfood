@@ -6,7 +6,7 @@
 
 @push('styles')
 @push('styles')
-<link href="{{ asset('css/admin/users.css') }}" rel="stylesheet">
+<link href="{{ asset('css/admin/users/users.css') }}" rel="stylesheet">
 @endpush
 
 @endpush

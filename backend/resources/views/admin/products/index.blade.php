@@ -251,26 +251,26 @@
 
 {{-- Notifikasi --}}
 @if(session('success'))
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="bi bi-check-circle me-2"></i>
-        {{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="bi bi-check-circle me-2"></i>
+    {{ session('success') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
 @endif
 
 @if(session('error'))
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="bi bi-exclamation-circle me-2"></i>
-        {{ session('error') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-circle me-2"></i>
+    {{ session('error') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
 @endif
 
 @if(session('info'))
-    <div class="alert alert-info alert-dismissible fade show" role="alert">
-        {{ session('info') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
+<div class="alert alert-info alert-dismissible fade show" role="alert">
+    {{ session('info') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
 @endif
 
 {{-- Daftar produk --}}
@@ -298,20 +298,18 @@
                         name="search"
                         class="form-control"
                         placeholder="Cari nama produk, toko, atau pemilik..."
-                        value="{{ request('search') }}"
-                    >
+                        value="{{ request('search') }}">
                 </div>
 
                 <div class="col-lg-3 col-md-4 col-6">
                     <select name="kategori" class="form-select">
                         <option value="">Semua Kategori</option>
                         @foreach($categories as $category)
-                            <option
-                                value="{{ $category }}"
-                                @selected(request('kategori') === $category)
-                            >
-                                {{ $category }}
-                            </option>
+                        <option
+                            value="{{ $category }}"
+                            @selected(request('kategori')===$category)>
+                            {{ $category }}
+                        </option>
                         @endforeach
                     </select>
                 </div>
@@ -319,13 +317,13 @@
                 <div class="col-lg-2 col-md-4 col-6">
                     <select name="status" class="form-select">
                         <option value="">Semua Status</option>
-                        <option value="aktif" @selected(request('status') === 'aktif')>
+                        <option value="aktif" @selected(request('status')==='aktif' )>
                             Aktif
                         </option>
-                        <option value="habis" @selected(request('status') === 'habis')>
+                        <option value="habis" @selected(request('status')==='habis' )>
                             Habis
                         </option>
-                        <option value="expired" @selected(request('status') === 'expired')>
+                        <option value="expired" @selected(request('status')==='expired' )>
                             Expired
                         </option>
                     </select>
@@ -339,8 +337,7 @@
                     <a
                         href="{{ route('admin.products.index') }}"
                         class="btn btn-light border"
-                        title="Reset filter"
-                    >
+                        title="Reset filter">
                         <i class="bi bi-arrow-counterclockwise"></i>
                     </a>
                 </div>
@@ -365,123 +362,118 @@
 
             <tbody>
                 @forelse($products as $product)
-                    <tr>
-                        <td>
-                            <div class="d-flex align-items-center gap-3">
-                                @if($product->foto)
-                                    <img
-                                        src="{{ asset('storage/' . $product->foto) }}"
-                                        alt="{{ $product->nama }}"
-                                        class="product-image"
-                                    >
-                                @else
-                                    <div class="product-image d-grid place-items-center d-flex align-items-center justify-content-center">
-                                        <i class="bi bi-image text-muted fs-4"></i>
-                                    </div>
-                                @endif
-
-                                <div>
-                                    <div class="product-name">
-                                        {{ $product->nama }}
-                                    </div>
-                                    <div class="product-store">
-                                        {{ $product->mitra->nama_toko ?? 'Mitra tidak ditemukan' }}
-                                    </div>
-                                </div>
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            @if($product->foto)
+                            <img
+                                src="{{ asset('storage/' . $product->foto) }}"
+                                alt="{{ $product->nama }}"
+                                class="product-image">
+                            @else
+                            <div class="product-image d-grid place-items-center d-flex align-items-center justify-content-center">
+                                <i class="bi bi-image text-muted fs-4"></i>
                             </div>
-                        </td>
-
-                        <td>
-                            {{ $product->kategori ?: '-' }}
-                        </td>
-
-                        <td>
-                            <div class="product-price">
-                                Rp{{ number_format((float) $product->harga_diskon, 0, ',', '.') }}
-                            </div>
-                            <div class="product-old-price">
-                                Rp{{ number_format((float) $product->harga_original, 0, ',', '.') }}
-                            </div>
-                        </td>
-
-                        <td>{{ $product->stok }}</td>
-
-                        <td>
-                            {{ $product->expired_formatted ?? '-' }}
-                        </td>
-
-                        <td>
-                            <span class="product-status status-{{ $product->status }}">
-                                {{ ucfirst($product->status) }}
-                            </span>
-
-                            @if($product->is_expired && $product->status !== 'expired')
-                                <div class="text-danger mt-1" style="font-size: 10px;">
-                                    Melewati waktu kedaluwarsa
-                                </div>
                             @endif
-                        </td>
 
-                        <td class="text-center">
-                            <div class="d-flex justify-content-center gap-1">
-
-                                <a
-                                    href="{{ route('admin.products.show', $product) }}"
-                                    class="product-action"
-                                    title="Detail"
-                                >
-                                    <i class="bi bi-eye"></i>
-                                </a>
-
-                                <a
-                                    href="{{ route('admin.products.edit', $product) }}"
-                                    class="product-action"
-                                    title="Edit"
-                                >
-                                    <i class="bi bi-pencil-square"></i>
-                                </a>
-
-                                <form
-                                    action="{{ route('admin.products.destroy', $product) }}"
-                                    method="POST"
-                                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus produk {{ addslashes($product->nama) }}?')"
-                                >
-                                    @csrf
-                                    @method('DELETE')
-
-                                    <button
-                                        type="submit"
-                                        class="product-action delete"
-                                        title="Hapus"
-                                    >
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
-
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="7">
-                            <div class="empty-product">
-                                <i class="bi bi-box-seam"></i>
-                                <strong>Produk tidak ditemukan</strong>
-                                <div class="mt-1">
-                                    Belum ada produk yang sesuai dengan pencarian.
+                            <div>
+                                <div class="product-name">
+                                    {{ $product->nama }}
+                                </div>
+                                <div class="product-store">
+                                    {{ $product->mitra->nama_toko ?? 'Mitra tidak ditemukan' }}
                                 </div>
                             </div>
-                        </td>
-                    </tr>
+                        </div>
+                    </td>
+
+                    <td>
+                        {{ $product->kategori ?: '-' }}
+                    </td>
+
+                    <td>
+                        <div class="product-price">
+                            Rp{{ number_format((float) $product->harga_diskon, 0, ',', '.') }}
+                        </div>
+                        <div class="product-old-price">
+                            Rp{{ number_format((float) $product->harga_original, 0, ',', '.') }}
+                        </div>
+                    </td>
+
+                    <td>{{ $product->stok }}</td>
+
+                    <td>
+                        {{ $product->expired_formatted ?? '-' }}
+                    </td>
+
+                    <td>
+                        <span class="product-status status-{{ $product->status }}">
+                            {{ ucfirst($product->status) }}
+                        </span>
+
+                        @if($product->is_expired && $product->status !== 'expired')
+                        <div class="text-danger mt-1" style="font-size: 10px;">
+                            Melewati waktu kedaluwarsa
+                        </div>
+                        @endif
+                    </td>
+
+                    <td class="text-center">
+                        <div class="d-flex justify-content-center gap-1">
+
+                            <a
+                                href="{{ route('admin.products.show', $product) }}"
+                                class="product-action"
+                                title="Detail">
+                                <i class="bi bi-eye"></i>
+                            </a>
+
+                            <a
+                                href="{{ route('admin.products.edit', $product) }}"
+                                class="product-action"
+                                title="Edit">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+
+                            <form
+                                action="{{ route('admin.products.destroy', $product) }}"
+                                method="POST"
+                                onsubmit="return confirm('Apakah Anda yakin ingin menghapus produk {{ addslashes($product->nama) }}?')">
+                                @csrf
+                                @method('DELETE')
+
+                                <button
+                                    type="submit"
+                                    class="product-action delete"
+                                    title="Hapus">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+
+                        </div>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="7">
+                        <div class="empty-product">
+                            <i class="bi bi-box-seam"></i>
+                            <strong>Produk tidak ditemukan</strong>
+                            <div class="mt-1">
+                                Belum ada produk yang sesuai dengan pencarian.
+                            </div>
+                        </div>
+                    </td>
+                </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
 
     @if($products->hasPages())
-        <div class="pagination-wrapper">
-            {{ $products->links('pagination::bootstrap-5') }}
-        </div>
+    <div class="pagination-wrapper">
+        {{ $products->links('pagination::bootstrap-5') }}
+    </div>
     @endif
 
 </div>
