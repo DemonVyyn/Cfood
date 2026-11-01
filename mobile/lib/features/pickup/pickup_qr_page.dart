@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../models/food_model.dart';
-import '../../../widgets/curved_bottom_nav.dart';
 import 'widgets/pickup_status_card.dart';
 import 'widgets/qr_code_card.dart';
 import 'widgets/pickup_schedule_card.dart';
@@ -52,9 +51,6 @@ class PickupQrPage extends StatelessWidget {
             const PickupInstructionCard(),
           ],
         ),
-      ),
-      bottomNavigationBar: const CurvedBottomNav(
-        currentIndex: 0,
       ),
     );
   }
