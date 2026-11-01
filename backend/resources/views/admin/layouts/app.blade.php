@@ -489,10 +489,11 @@
             <span>Manajemen Produk</span>
         </a>
 
-        <span class="nav-item-cfood disabled">
+        <a href="{{ route('admin.orders.index') }}"
+            class="nav-item-cfood {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
             <i class="bi bi-receipt"></i>
             <span>Manajemen Pesanan</span>
-        </span>
+        </a>
 
         <div class="sidebar-bottom">
 

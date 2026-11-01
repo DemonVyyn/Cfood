@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminMitraController;
 use App\Http\Controllers\Admin\AdminProductController;
+use App\Http\Controllers\Admin\AdminOrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -91,6 +92,13 @@ Route::middleware(['auth', 'role:admin'])
 
         Route::delete('/products/{product}', [AdminProductController::class, 'destroy'])
             ->name('products.destroy');
+
+        // Manajemen Pesanan
+        Route::get('/orders', [AdminOrderController::class, 'index'])
+            ->name('orders.index');
+
+        Route::get('/orders/{order}', [AdminOrderController::class, 'show'])
+            ->name('orders.show');
 
         Route::post('/logout', [AdminAuthController::class, 'logout'])
             ->name('logout');
