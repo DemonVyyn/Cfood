@@ -5,7 +5,6 @@
 
 @push('styles')
 <link href="{{ asset('css/admin/orders/orders_show.css') }}" rel="stylesheet">
-
 @endpush
 
 @section('content')
