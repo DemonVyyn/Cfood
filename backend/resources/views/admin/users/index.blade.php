@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -20,7 +19,9 @@
             --sidebar-width: 255px;
         }
 
-        * { box-sizing: border-box; }
+        * {
+            box-sizing: border-box;
+        }
 
         body {
             margin: 0;
@@ -29,6 +30,7 @@
             font-family: Inter, "Segoe UI", Arial, sans-serif;
         }
 
+        /* SIDEBAR */
         .sidebar {
             position: fixed;
             inset: 0 auto 0 0;
@@ -96,7 +98,9 @@
             transition: .2s ease;
         }
 
-        .nav-item-cfood i { font-size: 17px; }
+        .nav-item-cfood i {
+            font-size: 17px;
+        }
 
         .nav-item-cfood:hover,
         .nav-item-cfood.active {
@@ -117,7 +121,9 @@
             background: #f1f7f2;
         }
 
-        .sidebar-note i { color: var(--green); }
+        .sidebar-note i {
+            color: var(--green);
+        }
 
         .sidebar-note p {
             margin: 8px 0 0;
@@ -140,8 +146,11 @@
             text-align: left;
         }
 
-        .logout-button:hover { background: #fff1f1; }
+        .logout-button:hover {
+            background: #fff1f1;
+        }
 
+        /* MAIN CONTENT */
         .main-content {
             min-height: 100vh;
             margin-left: var(--sidebar-width);
@@ -170,7 +179,9 @@
             font-size: 12px;
         }
 
-        .breadcrumb-text strong { color: var(--text); }
+        .breadcrumb-text strong {
+            color: var(--text);
+        }
 
         .admin-profile {
             display: flex;
@@ -189,8 +200,15 @@
             font-weight: 750;
         }
 
-        .profile-name { font-size: 12px; font-weight: 700; }
-        .profile-role { color: var(--muted); font-size: 10px; }
+        .profile-name {
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .profile-role {
+            color: var(--muted);
+            font-size: 10px;
+        }
 
         .content-wrapper {
             max-width: 1500px;
@@ -200,7 +218,7 @@
 
         .page-heading {
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             justify-content: space-between;
             gap: 20px;
             margin-bottom: 27px;
@@ -218,6 +236,28 @@
             font-size: 13px;
         }
 
+        .btn-add-user {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 17px;
+            border: 0;
+            border-radius: 9px;
+            background: var(--green);
+            color: white;
+            font-size: 12px;
+            font-weight: 650;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: .2s ease;
+        }
+
+        .btn-add-user:hover {
+            background: var(--green-dark);
+            color: white;
+        }
+
+        /* TABLE */
         .section-card {
             overflow: hidden;
             border: 1px solid #eaf0eb;
@@ -235,7 +275,11 @@
             border-bottom: 1px solid #edf1ee;
         }
 
-        .toolbar-title { margin: 0; font-size: 14px; font-weight: 750; }
+        .toolbar-title {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 750;
+        }
 
         .toolbar-caption {
             margin-top: 5px;
@@ -266,9 +310,14 @@
             font-size: 12px;
         }
 
-        .btn-search:hover { background: var(--green-dark); color: white; }
+        .btn-search:hover {
+            background: var(--green-dark);
+            color: white;
+        }
 
-        .table { margin: 0; }
+        .table {
+            margin: 0;
+        }
 
         .table thead th {
             padding: 15px 18px;
@@ -286,8 +335,16 @@
             vertical-align: middle;
         }
 
-        .user-name { color: var(--text); font-weight: 700; }
-        .user-email { margin-top: 3px; color: var(--muted); font-size: 11px; }
+        .user-name {
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        .user-email {
+            margin-top: 3px;
+            color: var(--muted);
+            font-size: 11px;
+        }
 
         .user-avatar {
             width: 35px;
@@ -309,15 +366,65 @@
             font-weight: 700;
         }
 
-        .role-customer { background: #eaf2ff; color: #3767a8; }
-        .role-mitra { background: #fff3df; color: #a56a13; }
-        .role-admin { background: #f0eaff; color: #7045a5; }
-        .status-active { background: #e7f6ec; color: #198754; }
-        .status-suspended { background: #fff0f0; color: #bd4c4c; }
+        .role-customer {
+            background: #eaf2ff;
+            color: #3767a8;
+        }
 
-        .pagination-wrapper { padding: 18px 20px; }
-        .pagination { margin: 0; }
-        .page-link { color: var(--green-dark); font-size: 12px; }
+        .role-mitra {
+            background: #fff3df;
+            color: #a56a13;
+        }
+
+        .role-admin {
+            background: #f0eaff;
+            color: #7045a5;
+        }
+
+        .status-active {
+            background: #e7f6ec;
+            color: #198754;
+        }
+
+        .status-suspended {
+            background: #fff0f0;
+            color: #bd4c4c;
+        }
+
+        .btn-edit {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 11px;
+            border: 1px solid #cfe6d7;
+            border-radius: 7px;
+            background: #f1f8f3;
+            color: var(--green-dark);
+            font-size: 11px;
+            font-weight: 650;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .btn-edit:hover {
+            background: var(--green);
+            border-color: var(--green);
+            color: white;
+        }
+
+        .pagination-wrapper {
+            padding: 18px 20px;
+        }
+
+        .pagination {
+            margin: 0;
+        }
+
+        .page-link {
+            color: var(--green-dark);
+            font-size: 12px;
+        }
+
         .page-item.active .page-link {
             background: var(--green);
             border-color: var(--green);
@@ -346,9 +453,15 @@
             display: none;
         }
 
+        /* RESPONSIVE */
         @media (max-width: 991px) {
-            .sidebar { transform: translateX(-100%); }
-            .sidebar.show { transform: translateX(0); }
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
 
             .sidebar-backdrop {
                 position: fixed;
@@ -366,20 +479,61 @@
                 visibility: visible;
             }
 
-            .main-content { margin-left: 0; }
-            .mobile-menu-button { display: inline-block; }
-            .topbar { padding: 0 20px; }
-            .content-wrapper { padding: 27px 20px; }
+            .main-content {
+                margin-left: 0;
+            }
+
+            .mobile-menu-button {
+                display: inline-block;
+            }
+
+            .topbar {
+                padding: 0 20px;
+            }
+
+            .content-wrapper {
+                padding: 27px 20px;
+            }
         }
 
         @media (max-width: 575px) {
-            .page-heading { flex-direction: column; }
-            .page-title { font-size: 22px; }
-            .profile-details { display: none; }
-            .content-wrapper { padding: 23px 15px; }
-            .toolbar { align-items: flex-start; flex-direction: column; }
-            .toolbar form { width: 100%; }
-            .toolbar .search-group { flex-wrap: wrap; }
+            .page-heading {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .page-title {
+                font-size: 22px;
+            }
+
+            .profile-details {
+                display: none;
+            }
+
+            .content-wrapper {
+                padding: 23px 15px;
+            }
+
+            .toolbar {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .toolbar form {
+                width: 100%;
+            }
+
+            .search-group {
+                flex-wrap: wrap;
+            }
+
+            .search-group input {
+                width: 100%;
+            }
+
+            .search-group select {
+                flex: 1;
+            }
         }
     </style>
 </head>
@@ -387,8 +541,12 @@
 <body>
 
 <aside class="sidebar" id="sidebar">
+
     <div class="brand">
-        <div class="brand-icon"><i class="bi bi-leaf-fill"></i></div>
+        <div class="brand-icon">
+            <i class="bi bi-leaf-fill"></i>
+        </div>
+
         <div>
             <h1 class="brand-name">CFood</h1>
             <div class="brand-subtitle">ADMINISTRATOR PANEL</div>
@@ -427,11 +585,14 @@
     <div class="sidebar-bottom">
         <div class="sidebar-note">
             <i class="bi bi-recycle"></i>
-            <p>Bersama CFood, selamatkan makanan berlebih dan kurangi food waste.</p>
+            <p>
+                Bersama CFood, selamatkan makanan berlebih dan kurangi food waste.
+            </p>
         </div>
 
         <form action="{{ route('admin.logout') }}" method="POST" class="mt-3">
             @csrf
+
             <button type="submit" class="logout-button">
                 <i class="bi bi-box-arrow-left"></i>
                 <span>Keluar dari Dashboard</span>
@@ -443,11 +604,16 @@
 <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
 <main class="main-content">
+
     <header class="topbar">
         <div class="d-flex align-items-center gap-3">
-            <button class="mobile-menu-button" id="menuToggle"
-                    type="button" aria-label="Buka menu"
-                    aria-expanded="false">
+            <button
+                class="mobile-menu-button"
+                id="menuToggle"
+                type="button"
+                aria-label="Buka menu"
+                aria-expanded="false"
+            >
                 <i class="bi bi-list"></i>
             </button>
 
@@ -460,14 +626,18 @@
             <div class="profile-avatar">
                 {{ strtoupper(substr(Auth::user()->nama ?? 'A', 0, 1)) }}
             </div>
+
             <div class="profile-details">
-                <div class="profile-name">{{ Auth::user()->nama }}</div>
+                <div class="profile-name">
+                    {{ Auth::user()->nama }}
+                </div>
                 <div class="profile-role">Administrator</div>
             </div>
         </div>
     </header>
 
     <div class="content-wrapper">
+
         <section class="page-heading">
             <div>
                 <h2 class="page-title">Manajemen Pengguna</h2>
@@ -475,19 +645,46 @@
                     Kelola dan pantau akun pengguna yang terdaftar di platform CFood.
                 </p>
             </div>
+
+            <a href="{{ route('admin.users.create') }}" class="btn-add-user">
+                <i class="bi bi-person-plus-fill"></i>
+                Tambah Pengguna
+            </a>
         </section>
 
         @if (session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
                 {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close"
+                ></button>
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close"
+                ></button>
             </div>
         @endif
 
         <section class="section-card">
+
             <div class="toolbar">
                 <div>
                     <h5 class="toolbar-title">Daftar Pengguna</h5>
+
                     <div class="toolbar-caption">
                         Menampilkan {{ $users->total() }} akun terdaftar
                     </div>
@@ -495,6 +692,7 @@
 
                 <form action="{{ route('admin.users.index') }}" method="GET">
                     <div class="d-flex align-items-center gap-2 search-group">
+
                         <input
                             type="text"
                             name="search"
@@ -505,26 +703,41 @@
 
                         <select name="role" class="form-select filter-select">
                             <option value="">Semua Role</option>
-                            <option value="customer" @selected(request('role') === 'customer')>
+
+                            <option
+                                value="customer"
+                                @selected(request('role') === 'customer')
+                            >
                                 Customer
                             </option>
-                            <option value="mitra" @selected(request('role') === 'mitra')>
+
+                            <option
+                                value="mitra"
+                                @selected(request('role') === 'mitra')
+                            >
                                 Mitra
                             </option>
-                            <option value="admin" @selected(request('role') === 'admin')>
+
+                            <option
+                                value="admin"
+                                @selected(request('role') === 'admin')
+                            >
                                 Admin
                             </option>
                         </select>
 
                         <button type="submit" class="btn btn-search">
-                            <i class="bi bi-search me-1"></i> Cari
+                            <i class="bi bi-search me-1"></i>
+                            Cari
                         </button>
+
                     </div>
                 </form>
             </div>
 
             <div class="table-responsive">
                 <table class="table table-hover">
+
                     <thead>
                         <tr>
                             <th>NO.</th>
@@ -533,27 +746,38 @@
                             <th>ROLE</th>
                             <th>STATUS</th>
                             <th>TANGGAL DAFTAR</th>
+                            <th>AKSI</th>
                         </tr>
                     </thead>
 
                     <tbody>
                         @forelse ($users as $user)
                             <tr>
-                                <td>{{ $users->firstItem() + $loop->index }}</td>
+                                <td>
+                                    {{ $users->firstItem() + $loop->index }}
+                                </td>
 
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
                                         <div class="user-avatar">
                                             {{ strtoupper(substr($user->nama, 0, 1)) }}
                                         </div>
+
                                         <div>
-                                            <div class="user-name">{{ $user->nama }}</div>
-                                            <div class="user-email">{{ $user->email }}</div>
+                                            <div class="user-name">
+                                                {{ $user->nama }}
+                                            </div>
+
+                                            <div class="user-email">
+                                                {{ $user->email }}
+                                            </div>
                                         </div>
                                     </div>
                                 </td>
 
-                                <td>{{ $user->phone }}</td>
+                                <td>
+                                    {{ $user->phone }}
+                                </td>
 
                                 <td>
                                     <span class="role-badge role-{{ $user->role }}">
@@ -563,20 +787,38 @@
 
                                 <td>
                                     @if ($user->status === 'active')
-                                        <span class="status-badge status-active">Aktif</span>
+                                        <span class="status-badge status-active">
+                                            Aktif
+                                        </span>
                                     @else
-                                        <span class="status-badge status-suspended">Ditangguhkan</span>
+                                        <span class="status-badge status-suspended">
+                                            Ditangguhkan
+                                        </span>
                                     @endif
                                 </td>
 
-                                <td>{{ $user->created_at?->format('d M Y') ?? '-' }}</td>
+                                <td>
+                                    {{ $user->created_at?->format('d M Y') ?? '-' }}
+                                </td>
+
+                                <td>
+                                    <a
+                                        href="{{ route('admin.users.edit', $user->id) }}"
+                                        class="btn-edit"
+                                    >
+                                        <i class="bi bi-pencil-square"></i>
+                                        Edit
+                                    </a>
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6">
+                                <td colspan="7">
                                     <div class="empty-state">
                                         <i class="bi bi-people"></i>
+
                                         <strong>Pengguna tidak ditemukan</strong>
+
                                         <div class="small mt-1">
                                             Coba ubah kata kunci pencarian atau filter role.
                                         </div>
@@ -585,19 +827,22 @@
                             </tr>
                         @endforelse
                     </tbody>
+
                 </table>
             </div>
 
             @if ($users->hasPages())
                 <div class="pagination-wrapper">
-                    {{ $users->links('pagination::bootstrap-5') }}
+                    {{ $users->withQueryString()->links('pagination::bootstrap-5') }}
                 </div>
             @endif
+
         </section>
 
         <footer class="footer-text">
             © {{ date('Y') }} CFood Admin Panel. Platform Pengurangan Food Waste.
         </footer>
+
     </div>
 </main>
 
@@ -609,12 +854,16 @@
     const sidebarBackdrop = document.getElementById('sidebarBackdrop');
 
     function openSidebar() {
+        if (!sidebar || !sidebarBackdrop || !menuToggle) return;
+
         sidebar.classList.add('show');
         sidebarBackdrop.classList.add('show');
         menuToggle.setAttribute('aria-expanded', 'true');
     }
 
     function closeSidebar() {
+        if (!sidebar || !sidebarBackdrop || !menuToggle) return;
+
         sidebar.classList.remove('show');
         sidebarBackdrop.classList.remove('show');
         menuToggle.setAttribute('aria-expanded', 'false');
@@ -630,32 +879,22 @@
         }
     });
 
-    // Klik area di luar sidebar akan menutup menu.
-    document.addEventListener('click', function (event) {
-        if (
-            sidebar.classList.contains('show') &&
-            !sidebar.contains(event.target) &&
-            !menuToggle.contains(event.target)
-        ) {
-            closeSidebar();
-        }
-    });
+    sidebarBackdrop?.addEventListener('click', closeSidebar);
 
-    // Klik backdrop juga menutup sidebar.
-    sidebarBackdrop.addEventListener('click', closeSidebar);
-
-    // Tombol Escape menutup sidebar.
     document.addEventListener('keydown', function (event) {
         if (event.key === 'Escape') {
             closeSidebar();
         }
     });
 
-    // Setelah memilih menu navigasi, sidebar ditutup pada layar kecil.
-    sidebar.querySelectorAll('a').forEach(function (link) {
-        link.addEventListener('click', function () {
+    sidebar?.querySelectorAll('a').forEach(function (link) {
+        link.addEventListener('click', closeSidebar);
+    });
+
+    window.addEventListener('resize', function () {
+        if (window.innerWidth > 991) {
             closeSidebar();
-        });
+        }
     });
 </script>
 
