@@ -1,0 +1,51 @@
+.form-card {
+    background: #fff;
+    border: 1px solid #e9eee9;
+    border-radius: 14px;
+    padding: 24px;
+}
+
+.form-section-title {
+    color: #203d2c;
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.form-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #46554b;
+}
+
+.form-control,
+.form-select {
+    border-color: #dfe6e0;
+    border-radius: 9px;
+    min-height: 43px;
+    font-size: 13px;
+}
+
+textarea.form-control {
+    min-height: 110px;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #3b9660;
+    box-shadow: 0 0 0 .2rem rgba(59, 150, 96, .12);
+}
+
+.current-product-image {
+    width: 150px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 1px solid #e5eae5;
+}
+
+.form-hint {
+    color: #89948d;
+    font-size: 11px;
+    margin-top: 5px;
+}
