@@ -5,6 +5,10 @@ import '../core/network/api_client.dart';
 import '../models/notification_model.dart';
 
 class NotificationService {
+  // ============================================================
+  // MITRA NOTIFICATIONS
+  // ============================================================
+
   Future<List<NotificationModel>> getNotifications(
     String token,
   ) async {
@@ -65,6 +69,74 @@ class NotificationService {
     }
   }
 
+  // ============================================================
+  // CUSTOMER NOTIFICATIONS
+  // ============================================================
+
+  Future<List<NotificationModel>> getCustomerNotifications(
+    String token,
+  ) async {
+    try {
+      final response = await ApiClient.dio.get(
+        '/notifications',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+
+      final List<dynamic> data = response.data['data'];
+
+      return data
+          .map(
+            (item) => NotificationModel.fromJson(
+              item as Map<String, dynamic>,
+            ),
+          )
+          .toList();
+    } on DioException catch (e) {
+      throw _extractError(e);
+    }
+  }
+
+  Future<void> markCustomerAsRead({
+    required String token,
+    required int notificationId,
+  }) async {
+    try {
+      await ApiClient.dio.patch(
+        '/notifications/$notificationId/read',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+    } on DioException catch (e) {
+      throw _extractError(e);
+    }
+  }
+
+  Future<void> markAllCustomerAsRead(String token) async {
+    try {
+      await ApiClient.dio.patch(
+        '/notifications/read-all',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+    } on DioException catch (e) {
+      throw _extractError(e);
+    }
+  }
+
+  // ============================================================
+  // ERROR HANDLER
+  // ============================================================
+
   String _extractError(DioException e) {
     final data = e.response?.data;
 
@@ -74,6 +146,14 @@ class NotificationService {
 
     if (e.response?.statusCode == 401) {
       return 'Sesi login berakhir. Silakan login kembali.';
+    }
+
+    if (e.response?.statusCode == 403) {
+      return 'Anda tidak memiliki izin untuk mengakses notifikasi ini.';
+    }
+
+    if (e.response?.statusCode == 404) {
+      return 'Data atau endpoint notifikasi tidak ditemukan.';
     }
 
     return 'Gagal menghubungkan ke server.';

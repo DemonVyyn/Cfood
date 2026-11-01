@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 
 import '../../../core/storage/storage_service.dart';
@@ -19,8 +20,7 @@ class MerchantNotificationPage extends StatefulWidget {
 
 class _MerchantNotificationPageState
     extends State<MerchantNotificationPage> {
-  final NotificationService _notificationService =
-      NotificationService();
+  final NotificationService _notificationService = NotificationService();
 
   List<NotificationModel> _notifications = [];
 
@@ -92,40 +92,27 @@ class _MerchantNotificationPageState
 
     if (index == -1) return;
 
-    try {
-      final token = await _getToken();
+    final token = await _getToken();
 
-      await _notificationService.markAsRead(
-        token: token,
-        notificationId: notification.id,
+    await _notificationService.markAsRead(
+      token: token,
+      notificationId: notification.id,
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      final oldNotification = _notifications[index];
+
+      _notifications[index] = NotificationModel(
+        id: oldNotification.id,
+        title: oldNotification.title,
+        message: oldNotification.message,
+        isRead: true,
+        createdAt: oldNotification.createdAt,
+        readAt: DateTime.now(),
       );
-
-      if (!mounted) return;
-
-      setState(() {
-        final oldNotification = _notifications[index];
-
-        _notifications[index] = NotificationModel(
-          id: oldNotification.id,
-          title: oldNotification.title,
-          message: oldNotification.message,
-          isRead: true,
-          createdAt: oldNotification.createdAt,
-          readAt: DateTime.now(),
-        );
-      });
-    } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Gagal memperbarui notifikasi: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-
-      rethrow;
-    }
+    });
   }
 
   Future<void> _openNotification(
@@ -148,8 +135,15 @@ class _MerchantNotificationPageState
           ),
         ),
       );
-    } catch (_) {
-      // Halaman rincian tidak dibuka jika status baca gagal disimpan.
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal membuka notifikasi: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -167,6 +161,8 @@ class _MerchantNotificationPageState
 
       if (!mounted) return;
 
+      final now = DateTime.now();
+
       setState(() {
         _notifications = _notifications.map((notification) {
           if (notification.isRead) return notification;
@@ -177,7 +173,7 @@ class _MerchantNotificationPageState
             message: notification.message,
             isRead: true,
             createdAt: notification.createdAt,
-            readAt: DateTime.now(),
+            readAt: now,
           );
         }).toList();
       });
@@ -226,7 +222,8 @@ class _MerchantNotificationPageState
         actions: [
           if (_unreadCount > 0)
             TextButton(
-              onPressed: _isMarkingAll ? null : _markAllAsRead,
+              onPressed:
+                  _isMarkingAll ? null : _markAllAsRead,
               child: _isMarkingAll
                   ? const SizedBox(
                       width: 18,

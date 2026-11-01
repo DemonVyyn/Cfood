@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminMitraController;
 use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\AdminOrderController;
+use App\Http\Controllers\Admin\AdminNotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -100,6 +101,17 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/orders/{order}', [AdminOrderController::class, 'show'])
             ->name('orders.show');
 
+        // Manajemen Notifikasi
+        Route::get('/notifications', [AdminNotificationController::class, 'index'])
+            ->name('notifications.index');
+
+        Route::get('/notifications/create', [AdminNotificationController::class, 'create'])
+            ->name('notifications.create');
+
+        Route::post('/notifications', [AdminNotificationController::class, 'store'])
+            ->name('notifications.store');
+
+        // Logout Admin
         Route::post('/logout', [AdminAuthController::class, 'logout'])
             ->name('logout');
 

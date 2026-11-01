@@ -33,12 +33,23 @@ Route::post('/login', [AuthController::class, 'login'])
 Route::middleware(['auth:sanctum', 'role:customer'])
     ->group(function () {
 
+        // Order Management
         Route::post('/orders', [OrderController::class, 'store']);
-
         Route::get('/orders', [OrderController::class, 'index']);
-
         Route::get('/orders/{id}', [OrderController::class, 'show']);
 
+        // Notification Management
+        Route::get('/notifications', [NotificationController::class, 'index']);
+
+        Route::patch('/notifications/{id}/read', [
+            NotificationController::class,
+            'markAsRead'
+        ]);
+
+        Route::patch('/notifications/read-all', [
+            NotificationController::class,
+            'markAllAsRead'
+        ]);
     });
 
 
@@ -117,7 +128,6 @@ Route::middleware(['auth:sanctum', 'role:mitra'])
             '/merchant/notifications/read-all',
             [NotificationController::class, 'markAllAsRead']
         );
-
     });
 
 
@@ -142,5 +152,4 @@ Route::middleware('auth:sanctum')
 
         // Logout
         Route::post('/logout', [AuthController::class, 'logout']);
-
     });

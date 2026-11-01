@@ -495,6 +495,12 @@
             <span>Manajemen Pesanan</span>
         </a>
 
+        <a href="{{ route('admin.notifications.index') }}"
+            class="nav-item-cfood {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}">
+            <i class="bi bi-bell"></i>
+            <span>Manajemen Notifikasi</span>
+        </a>
+
         <div class="sidebar-bottom">
 
             <div class="sidebar-note">
