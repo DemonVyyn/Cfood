@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use App\Services\AuditTrail;
 
 class OrderController extends Controller
 {
@@ -131,12 +132,20 @@ class OrderController extends Controller
                 'read_at' => null,
             ]);
 
-            return $pesanan->load([
-                'items.menu',
-                'mitra',
-                'pembayaran',
-            ]);
-        });
+            // Catat aktivitas pembuatan pesanan.
+            AuditTrail::record(
+            'create_order',
+            $pesanan,
+            'success',
+            'Customer berhasil membuat pesanan.'
+        );
+
+        return $pesanan->load([
+            'items.menu',
+            'mitra',
+            'pembayaran',
+        ]);
+        }, 5); // Retry 5 kali jika terjadi deadlock.
 
         return response()->json([
             'success' => true,

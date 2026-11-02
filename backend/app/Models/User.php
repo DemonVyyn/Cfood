@@ -24,6 +24,10 @@ class User extends Authenticatable
         'last_login',
     ];
 
+    /**
+     * Menyembunyikan password dan remember_token
+     * dari hasil serialisasi model ke JSON.
+     */
     protected $hidden = [
         'password',
         'remember_token',
@@ -33,7 +37,6 @@ class User extends Authenticatable
     {
         return [
             'last_login' => 'datetime',
-            'password' => 'hashed',
         ];
     }
 

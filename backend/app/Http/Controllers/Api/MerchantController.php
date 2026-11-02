@@ -10,6 +10,7 @@ use App\Models\Pembayaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use App\Services\AuditTrail;
 
 class MerchantController extends Controller
 {
@@ -169,6 +170,14 @@ class MerchantController extends Controller
         $order->order_status = 'siap_diambil';
         $order->save();
 
+        // Catat aktivitas verifikasi pembayaran.
+        AuditTrail::record(
+        'verify_payment',
+        $order,
+        'success',
+        'Mitra berhasil memverifikasi pembayaran pesanan.'  
+        );
+
         return response()->json([
             'success' => true,
             'message' => 'Pembayaran berhasil diverifikasi. Pesanan siap diambil.',
@@ -179,7 +188,7 @@ class MerchantController extends Controller
                 'waktu_pembayaran' => $payment->waktu_pembayaran,
             ],
         ]);
-    });
+    }, 5); // Retry 5 kali jika terjadi deadlock.
 }
 
 
@@ -231,6 +240,14 @@ class MerchantController extends Controller
         $order->order_status = 'selesai';
         $order->save();
 
+        // Catat aktivitas konfirmasi pengambilan pesanan.
+        AuditTrail::record(
+            'confirm_pickup',
+            $order,
+            'success',
+            'Mitra berhasil mengonfirmasi pengambilan pesanan.'
+        );
+
         return response()->json([
             'success' => true,
             'message' => 'Pickup berhasil dikonfirmasi.',
@@ -239,7 +256,7 @@ class MerchantController extends Controller
                 'order_status' => $order->order_status,
             ],
         ]);
-    });
+    }, 5); // Retry 5 kali jika terjadi deadlock.
 }
 
     public function products(Request $request)

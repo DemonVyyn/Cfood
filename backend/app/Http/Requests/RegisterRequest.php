@@ -16,47 +16,55 @@ class RegisterRequest extends FormRequest
         return [
             'role' => [
                 'required',
-                'in:customer,mitra'
+                'in:customer,mitra',
             ],
 
             'nama' => [
                 'required',
                 'string',
-                'max:255'
+                'max:255',
             ],
 
             'email' => [
                 'required',
                 'email',
-                'unique:users,email'
+                'unique:users,email',
             ],
 
             'phone' => [
                 'required',
                 'string',
-                'unique:users,phone'
+                'unique:users,phone',
             ],
 
             'password' => [
                 'required',
+                'string',
                 'min:8',
-                'confirmed'
+                'confirmed',
             ],
 
             'nama_toko' => [
-                'required_if:role,mitra'
+                'required_if:role,mitra',
+                'nullable',
+                'string',
             ],
 
             'alamat' => [
-                'required_if:role,mitra'
+                'required_if:role,mitra',
+                'nullable',
+                'string',
             ],
 
             'nomor_telepon_toko' => [
-                'required_if:role,mitra'
+                'required_if:role,mitra',
+                'nullable',
+                'string',
             ],
 
             'deskripsi_toko' => [
-                'nullable'
+                'nullable',
+                'string',
             ],
         ];
     }
@@ -64,14 +72,25 @@ class RegisterRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'nama_toko.required_if'
-                => 'Nama toko wajib diisi',
+            'role.required' => 'Role wajib dipilih',
+            'role.in' => 'Role tidak valid',
 
-            'alamat.required_if'
-                => 'Alamat toko wajib diisi',
+            'nama.required' => 'Nama wajib diisi',
 
-            'nomor_telepon_toko.required_if'
-                => 'Nomor telepon toko wajib diisi',
+            'email.required' => 'Email wajib diisi',
+            'email.email' => 'Format email tidak valid',
+            'email.unique' => 'Email sudah terdaftar',
+
+            'phone.required' => 'Nomor telepon wajib diisi',
+            'phone.unique' => 'Nomor telepon sudah terdaftar',
+
+            'password.required' => 'Password wajib diisi',
+            'password.min' => 'Password minimal 8 karakter',
+            'password.confirmed' => 'Konfirmasi password tidak cocok',
+
+            'nama_toko.required_if' => 'Nama toko wajib diisi',
+            'alamat.required_if' => 'Alamat toko wajib diisi',
+            'nomor_telepon_toko.required_if' => 'Nomor telepon toko wajib diisi',
         ];
     }
 }

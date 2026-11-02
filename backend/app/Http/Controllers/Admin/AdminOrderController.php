@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\Pesanan;
 use Illuminate\Http\Request;
 
@@ -59,7 +60,10 @@ class AdminOrderController extends Controller
 
         if (in_array($request->payment_status, $allowedPaymentStatuses, true)) {
             $query->whereHas('pembayaran', function ($paymentQuery) use ($request) {
-                $paymentQuery->where('status_pembayaran', $request->payment_status);
+                $paymentQuery->where(
+                    'status_pembayaran',
+                    $request->payment_status
+                );
             });
         }
 
@@ -68,7 +72,9 @@ class AdminOrderController extends Controller
             $query->whereDate('created_at', $request->date);
         }
 
-        $orders = $query->latest()->paginate(10)->withQueryString();
+        $orders = $query->latest()
+            ->paginate(10)
+            ->withQueryString();
 
         // Statistik seluruh pesanan.
         $statistics = [
@@ -115,6 +121,16 @@ class AdminOrderController extends Controller
             'pembayaran',
         ]);
 
-        return view('admin.orders.show', compact('order'));
+        // Ambil riwayat Audit Trail khusus untuk pesanan ini.
+        $auditLogs = AuditLog::with('actor')
+            ->where('object_type', 'Pesanan')
+            ->where('object_id', (string) $order->getKey())
+            ->orderByDesc('event_at')
+            ->get();
+
+        return view('admin.orders.show', compact(
+            'order',
+            'auditLogs'
+        ));
     }
 }

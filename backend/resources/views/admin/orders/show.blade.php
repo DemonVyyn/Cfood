@@ -1,3 +1,4 @@
+
 @extends('admin.layouts.app')
 
 @section('title', 'Detail Pesanan | CFood')
@@ -24,6 +25,12 @@
         'paid' => 'Paid',
         'failed' => 'Failed',
         'refunded' => 'Refunded',
+    ];
+
+    $actionLabels = [
+        'create_order' => 'Membuat Pesanan',
+        'verify_payment' => 'Verifikasi Pembayaran',
+        'confirm_pickup' => 'Konfirmasi Pengambilan',
     ];
 @endphp
 
@@ -276,11 +283,97 @@
     @endif
 </div>
 
+{{-- Audit Trail --}}
+<div class="detail-card">
+    <h5 class="detail-title">
+        <i class="bi bi-shield-check text-success"></i>
+        Riwayat Aktivitas Pesanan (Audit Trail)
+    </h5>
+
+    @if($auditLogs->isNotEmpty())
+
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Waktu Aktivitas</th>
+                        <th>Pelaku</th>
+                        <th>Aktivitas</th>
+                        <th>Objek</th>
+                        <th>Hasil</th>
+                        <th>Deskripsi</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach($auditLogs as $log)
+                        <tr>
+                            <td>
+                                {{ $log->event_at?->format('d M Y, H:i:s') ?? '-' }}
+                            </td>
+
+                            <td>
+                                <strong>
+                                    {{ $log->actor?->nama ?? 'Tidak diketahui' }}
+                                </strong>
+                                <br>
+                                <small class="text-muted">
+                                    {{ ucfirst($log->actor_role ?? '-') }}
+                                    (ID: {{ $log->actor_id ?? '-' }})
+                                </small>
+                            </td>
+
+                            <td>
+                                {{ $actionLabels[$log->action] ?? $log->action }}
+                            </td>
+
+                            <td>
+                                {{ $log->object_type ?? '-' }}
+                                #{{ $log->object_id ?? '-' }}
+                            </td>
+
+                            <td>
+                                @if($log->result === 'success')
+                                    <span class="badge bg-success">Berhasil</span>
+                                @elseif($log->result === 'failed')
+                                    <span class="badge bg-danger">Gagal</span>
+                                @else
+                                    <span class="badge bg-secondary">
+                                        {{ ucfirst($log->result) }}
+                                    </span>
+                                @endif
+                            </td>
+
+                            <td>
+                                {{ $log->description ?? '-' }}
+                                <br>
+                                <small class="text-muted">
+                                    IP: {{ $log->ip_address ?? '-' }}
+                                </small>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+
+    @else
+
+        <div class="text-center py-4 text-muted">
+            <i class="bi bi-clock-history fs-3"></i>
+            <p class="mb-0 mt-2">
+                Belum terdapat riwayat aktivitas untuk pesanan ini.
+            </p>
+        </div>
+
+    @endif
+</div>
+
 <div class="information-note">
     <i class="bi bi-shield-check"></i>
-    Halaman ini digunakan untuk monitoring transaksi oleh Admin.
-    Informasi pembayaran ditampilkan sebagai catatan transaksi dan tidak dapat
-    diubah melalui halaman ini.
+    Halaman ini digunakan untuk monitoring transaksi dan riwayat aktivitas
+    oleh Admin. Informasi pembayaran dan Audit Trail ditampilkan sebagai
+    catatan transaksi dan tidak dapat diubah melalui halaman ini.
 </div>
 
 @endsection

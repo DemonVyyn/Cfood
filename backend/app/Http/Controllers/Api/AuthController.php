@@ -13,40 +13,33 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function register(
-        RegisterRequest $request
-    ) {
-        // Transaksi: jika pembuatan data mitra gagal,
-        // pembuatan user ikut di-rollback (commit/rollback).
+    /**
+     * Registrasi pengguna.
+     * Password di-hash sebelum disimpan ke database.
+     */
+    public function register(RegisterRequest $request)
+    {
         $user = DB::transaction(function () use ($request) {
             $user = User::create([
                 'nama' => $request->nama,
                 'email' => $request->email,
                 'phone' => $request->phone,
-                'password' => $request->password,
+
+                // Hashing dan salting otomatis oleh Laravel.
+                'password' => Hash::make($request->password),
+
                 'role' => $request->role,
                 'status' => 'active',
             ]);
 
             if ($request->role === 'mitra') {
-
                 Mitra::create([
                     'user_id' => $user->id,
-
-                    'nama_toko'
-                        => $request->nama_toko,
-
-                    'deskripsi_toko'
-                        => $request->deskripsi_toko,
-
-                    'alamat'
-                        => $request->alamat,
-
-                    'nomor_telepon'
-                        => $request->nomor_telepon_toko,
-
-                    'status_verifikasi'
-                        => 'pending',
+                    'nama_toko' => $request->nama_toko,
+                    'deskripsi_toko' => $request->deskripsi_toko,
+                    'alamat' => $request->alamat,
+                    'nomor_telepon' => $request->nomor_telepon_toko,
+                    'status_verifikasi' => 'pending',
                 ]);
             }
 
@@ -55,31 +48,26 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message'
-                => 'Registrasi berhasil',
+            'message' => 'Registrasi berhasil',
             'user' => $user,
         ], 201);
     }
 
-    public function login(
-        LoginRequest $request
-    ) {
-        $user = User::where(
-            'email',
-            $request->email
-        )->first();
+    /**
+     * Login pengguna.
+     * Password diverifikasi menggunakan Hash::check().
+     */
+    public function login(LoginRequest $request)
+    {
+        $user = User::where('email', $request->email)->first();
 
         if (
             !$user ||
-            !Hash::check(
-                $request->password,
-                $user->password
-            )
+            !Hash::check($request->password, $user->password)
         ) {
             return response()->json([
                 'success' => false,
-                'message'
-                    => 'Email atau password salah',
+                'message' => 'Email atau password salah',
             ], 401);
         }
 
@@ -88,41 +76,40 @@ class AuthController extends Controller
         ]);
 
         $token = $user
-            ->createToken(
-                'mobile-token'
-            )
+            ->createToken('mobile-token')
             ->plainTextToken;
 
         return response()->json([
             'success' => true,
-            'message'
-                => 'Login berhasil',
+            'message' => 'Login berhasil',
             'token' => $token,
             'user' => $user,
         ]);
     }
 
-    public function profile(
-        Request $request
-    ) {
+    /**
+     * Menampilkan profil pengguna yang sedang login.
+     */
+    public function profile(Request $request)
+    {
         return response()->json([
             'success' => true,
             'user' => $request->user(),
         ]);
     }
 
-    public function logout(
-        Request $request
-    ) {
-        $request
-            ->user()
+    /**
+     * Logout pengguna.
+     */
+    public function logout(Request $request)
+    {
+        $request->user()
             ->currentAccessToken()
             ->delete();
 
         return response()->json([
             'success' => true,
-            'message'
-                => 'Logout berhasil',
+            'message' => 'Logout berhasil',
         ]);
     }
 }
