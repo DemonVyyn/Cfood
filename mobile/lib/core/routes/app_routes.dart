@@ -1,6 +1,9 @@
 
 import 'package:flutter/material.dart';
 
+import '../../features/auth/splash/splash_page.dart';
+import '../../features/onboarding/onboarding_page.dart';
+
 import '../../features/auth/role_selection_page.dart';
 import '../../features/auth/auth_flow_page.dart';
 
@@ -19,7 +22,13 @@ import '../../features/merchant/store_profile/store_profile_page.dart';
 import '../../features/merchant/notification/merchant_notification_page.dart';
 
 class AppRoutes {
+  static const String initialRoute = '/splash';
+
   static Map<String, WidgetBuilder> routes = {
+    // Splash dan onboarding
+    '/splash': (_) => const SplashPage(),
+    '/onboarding': (_) => const OnboardingPage(),
+
     // Autentikasi dan pemilihan role
     '/role': (_) => const RoleSelectionPage(),
     '/login': (_) => const AuthFlowPage(initialIsLogin: true),
@@ -31,7 +40,7 @@ class AppRoutes {
     '/history': (_) => const OrderHistoryPage(),
     '/notification': (_) => const NotificationPage(),
 
-    // Merchant: halaman induk
+    // Merchant
     '/merchant': (_) => const MerchantShellPage(),
 
     // Merchant: produk
@@ -47,12 +56,10 @@ class AppRoutes {
 
     // Merchant: notifikasi
     '/merchant-notifications': (_) =>
-      const MerchantNotificationPage(),
+        const MerchantNotificationPage(),
   };
 
-  static Route<dynamic>? onGenerateRoute(
-    RouteSettings settings,
-  ) {
+  static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
       case '/merchant-edit-product':
         final productId = settings.arguments as int;

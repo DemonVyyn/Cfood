@@ -11,14 +11,21 @@ class UserModel {
     required this.role,
   });
 
-  factory UserModel.fromJson(
-    Map<String, dynamic> json,
-  ) {
+  factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: json['id'] ?? 0,
-      nama: json['nama'] ?? '',
-      email: json['email'] ?? '',
-      role: json['role'] ?? '',
+      id: int.tryParse(json['id'].toString()) ?? 0,
+      nama: json['nama']?.toString() ?? '',
+      email: json['email']?.toString() ?? '',
+      role: json['role']?.toString() ?? '',
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'nama': nama,
+      'email': email,
+      'role': role,
+    };
   }
 }

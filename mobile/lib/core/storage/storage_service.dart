@@ -1,11 +1,16 @@
- import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'dart:convert';
+
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+import '../../models/user_model.dart';
 
 class StorageService {
-  static const _storage = FlutterSecureStorage();
+  static const FlutterSecureStorage _storage =
+      FlutterSecureStorage();
 
-  static Future<void> saveToken(
-    String token,
-  ) async {
+  // ---------- TOKEN ----------
+
+  static Future<void> saveToken(String token) async {
     await _storage.write(
       key: 'token',
       value: token,
@@ -24,12 +29,47 @@ class StorageService {
     );
   }
 
+  // ---------- DATA PENGGUNA ----------
+
+  static const String _userKey = 'user_data';
+
+  static Future<void> saveUser(UserModel user) async {
+    await _storage.write(
+      key: _userKey,
+      value: jsonEncode(user.toJson()),
+    );
+  }
+
+  static Future<UserModel?> getUser() async {
+    final raw = await _storage.read(
+      key: _userKey,
+    );
+
+    if (raw == null || raw.isEmpty) {
+      return null;
+    }
+
+    try {
+      final Map<String, dynamic> userData =
+          jsonDecode(raw);
+
+      return UserModel.fromJson(userData);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  static Future<void> clearUser() async {
+    await _storage.delete(
+      key: _userKey,
+    );
+  }
+
   // ---------- FOTO PROFIL ----------
 
-  static const _profilePhotoKey =
+  static const String _profilePhotoKey =
       'profile_photo_base64';
 
-  /// Simpan foto profil dalam format base64 (string).
   static Future<void> saveProfilePhotoBase64(
     String value,
   ) async {
@@ -39,14 +79,12 @@ class StorageService {
     );
   }
 
-  /// Ambil foto profil tersimpan (base64), null kalau belum ada.
   static Future<String?> getProfilePhotoBase64() async {
     return await _storage.read(
       key: _profilePhotoKey,
     );
   }
 
-  /// Hapus foto profil tersimpan.
   static Future<void> clearProfilePhotoBase64() async {
     await _storage.delete(
       key: _profilePhotoKey,
@@ -55,11 +93,9 @@ class StorageService {
 
   // ---------- PESANAN YANG SUDAH DI-POPUP ----------
 
-  static const _acknowledgedOrdersKey =
+  static const String _acknowledgedOrdersKey =
       'acknowledged_orders';
 
-  /// Simpan daftar ID pesanan yang sudah di-popup konfirmasi
-  /// agar tidak muncul berulang.
   static Future<void> saveAcknowledgedOrders(
     List<int> ids,
   ) async {
@@ -69,12 +105,15 @@ class StorageService {
     );
   }
 
-  /// Ambil daftar ID pesanan yang sudah di-popup konfirmasi.
   static Future<List<int>> getAcknowledgedOrders() async {
     final raw = await _storage.read(
       key: _acknowledgedOrdersKey,
     );
-    if (raw == null || raw.isEmpty) return const [];
+
+    if (raw == null || raw.isEmpty) {
+      return const [];
+    }
+
     return raw
         .split(',')
         .where((e) => e.trim().isNotEmpty)
