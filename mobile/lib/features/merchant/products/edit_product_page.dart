@@ -20,7 +20,7 @@ class EditProductPage extends StatefulWidget {
 }
 
 class _EditProductPageState extends State<EditProductPage> {
-  static const Color primaryGreen = Color(0xFF168348);
+  static const Color primaryGreen = Color(0xFF0CB52A);
   static const Color backgroundColor = Color(0xFFF5F8F6);
   static const Color textColor = Color(0xFF202B24);
   static const Color secondaryTextColor = Color(0xFF78847C);

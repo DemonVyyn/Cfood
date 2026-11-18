@@ -132,7 +132,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 : Colors.white,
             border: Border.all(
               color: selected
-                  ? const Color(0xFF166534)
+                  ? const Color(0xFF0CB52A)
                   : const Color(0xFFE0E0E0),
               width: selected ? 1.5 : 1,
             ),

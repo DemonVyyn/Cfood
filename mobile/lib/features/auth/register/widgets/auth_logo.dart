@@ -11,7 +11,7 @@ class AuthLogo extends StatelessWidget {
           width: 42,
           height: 42,
           decoration: BoxDecoration(
-            color: const Color(0xFF166534),
+            color: const Color(0xFF0CB52A),
             borderRadius: BorderRadius.circular(12),
           ),
           child: const Icon(
@@ -28,7 +28,7 @@ class AuthLogo extends StatelessWidget {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF166534),
+                color: Color(0xFF0CB52A),
               ),
             ),
             Text(

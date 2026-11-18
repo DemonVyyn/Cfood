@@ -34,7 +34,7 @@ class AuthTabSwitch extends StatelessWidget {
                 margin: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
                   color: isLogin
-                      ? const Color(0xFF166534)
+                      ? const Color(0xFF0CB52A)
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -66,7 +66,7 @@ class AuthTabSwitch extends StatelessWidget {
                 margin: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
                   color: !isLogin
-                      ? const Color(0xFF166534)
+                      ? const Color(0xFF0CB52A)
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(10),
                 ),

@@ -21,7 +21,7 @@ class AuthPrimaryButton
         style:
             ElevatedButton.styleFrom(
           backgroundColor:
-              const Color(0xFF166534),
+              const Color(0xFF0CB52A),
           shape:
               RoundedRectangleBorder(
             borderRadius:
