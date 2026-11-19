@@ -128,4 +128,37 @@ class OrderService {
       throw Exception('Gagal mengambil riwayat pesanan.');
     }
   }
+
+  /// Membatalkan pesanan customer.
+  Future<void> cancelOrder(int id, {String? reason}) async {
+    final token = await StorageService.getToken();
+
+    if (token == null || token.isEmpty) {
+      throw Exception('Sesi login berakhir. Silakan login kembali.');
+    }
+
+    try {
+      await ApiClient.dio.post(
+        '/orders/$id/cancel',
+        data: {
+          if (reason != null && reason.isNotEmpty)
+            'alasan': reason,
+        },
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Accept': 'application/json',
+          },
+        ),
+      );
+    } on DioException catch (e) {
+      final responseData = e.response?.data;
+      if (responseData is Map &&
+          responseData['message'] != null) {
+        throw Exception(responseData['message'].toString());
+      }
+
+      throw Exception('Gagal membatalkan pesanan.');
+    }
+  }
 }

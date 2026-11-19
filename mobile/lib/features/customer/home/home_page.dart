@@ -51,13 +51,12 @@ class _HomePageState
     final foods = provider.foods;
 
     final tokoList = <String>[
-      'Semua',
-      ...provider.foods
-          .map((f) => f.namaToko)
-          .where((n) => n.isNotEmpty)
-          .toSet()
-          .toList(),
-    ];
+  'Semua',
+  ...provider.foods
+      .map((f) => f.namaToko)
+      .where((n) => n.isNotEmpty)
+      .toSet(),
+];
 
     final totalProducts =
         foods.length;

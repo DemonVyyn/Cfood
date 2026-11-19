@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../core/storage/storage_service.dart';
 import '../models/user_model.dart';
@@ -119,6 +122,8 @@ class AuthProvider extends ChangeNotifier {
 
       notifyListeners();
 
+      unawaited(refreshProfile());
+
       return true;
     } catch (e) {
       debugPrint('CHECK LOGIN ERROR: $e');
@@ -126,6 +131,136 @@ class AuthProvider extends ChangeNotifier {
       user = null;
 
       return false;
+    }
+  }
+
+  Future<String> _requireToken() async {
+    final token = await StorageService.getToken();
+
+    if (token == null || token.isEmpty) {
+      throw Exception('Sesi login berakhir. Silakan login kembali.');
+    }
+
+    return token;
+  }
+
+  // ---------- UPDATE PROFIL ----------
+
+  Future<bool> updateProfile({
+    required String nama,
+    required String email,
+    required String phone,
+  }) async {
+    try {
+      isLoading = true;
+      errorMessage = null;
+      notifyListeners();
+
+      final token = await _requireToken();
+
+      final response = await _authService.updateProfile(
+        token: token,
+        nama: nama,
+        email: email,
+        phone: phone,
+      );
+
+      final updated = UserModel.fromJson(
+        Map<String, dynamic>.from(
+          response['user'] as Map,
+        ),
+      );
+
+      await StorageService.saveUser(updated);
+      user = updated;
+
+      return true;
+    } catch (e) {
+      errorMessage = e.toString();
+      return false;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> refreshProfile() async {
+    try {
+      final token = await _requireToken();
+
+      final response = await _authService.profile(token);
+
+      final updated = UserModel.fromJson(
+        Map<String, dynamic>.from(
+          response['user'] as Map,
+        ),
+      );
+
+      await StorageService.saveUser(updated);
+      user = updated;
+
+      notifyListeners();
+    } catch (e) {
+      debugPrint('REFRESH PROFILE ERROR: $e');
+    }
+  }
+
+  Future<bool> updatePhoto(XFile file) async {
+    try {
+      isLoading = true;
+      errorMessage = null;
+      notifyListeners();
+
+      final token = await _requireToken();
+
+      final response = await _authService.uploadProfilePhoto(
+        token: token,
+        file: file,
+      );
+
+      final updated = UserModel.fromJson(
+        Map<String, dynamic>.from(
+          response['user'] as Map,
+        ),
+      );
+
+      await StorageService.saveUser(updated);
+      user = updated;
+
+      return true;
+    } catch (e) {
+      errorMessage = e.toString();
+      return false;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      isLoading = true;
+      errorMessage = null;
+      notifyListeners();
+
+      final token = await _requireToken();
+
+      await _authService.changePassword(
+        token: token,
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+      );
+
+      return true;
+    } catch (e) {
+      errorMessage = e.toString();
+      return false;
+    } finally {
+      isLoading = false;
+      notifyListeners();
     }
   }
 

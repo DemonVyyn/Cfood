@@ -2,15 +2,39 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../providers/auth_provider.dart';
+import '../../../providers/merchant_provider.dart';
 import 'widgets/store_header.dart';
 import 'widgets/store_info_card.dart';
 import 'widgets/store_help_widget.dart';
 
-class StoreProfilePage extends StatelessWidget {
+class StoreProfilePage extends StatefulWidget {
   const StoreProfilePage({super.key});
 
+  @override
+  State<StoreProfilePage> createState() =>
+      _StoreProfilePageState();
+}
+
+class _StoreProfilePageState
+    extends State<StoreProfilePage> {
   static const Color backgroundColor = Color(0xFFF7F9F7);
   static const Color textColor = Color(0xFF263126);
+
+  bool _requested = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (!_requested) {
+      _requested = true;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        context.read<MerchantProvider>().loadProfile();
+      });
+    }
+  }
 
   Future<void> _logout(BuildContext context) async {
     try {

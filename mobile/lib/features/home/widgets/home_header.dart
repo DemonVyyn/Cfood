@@ -11,13 +11,30 @@ import '../../../providers/auth_provider.dart';
 import '../../../providers/food_provider.dart';
 
 class HomeHeader extends StatelessWidget {
-  const HomeHeader({super.key});
+  final VoidCallback? onProfileTap;
+
+  const HomeHeader({
+    super.key,
+    this.onProfileTap,
+  });
+
+  void _openProfile(BuildContext context) {
+    final callback = onProfileTap;
+    if (callback != null) {
+      callback();
+      return;
+    }
+
+    Navigator.pushNamed(context, '/profile');
+  }
 
   @override
   Widget build(BuildContext context) {
     // Ambil nama lengkap user dari sesi yang sedang login.
     final photo = 
         context.watch<ProfilePhotoProvider>().photo;
+    final photoUrl =
+        context.watch<AuthProvider>().user?.fotoProfilUrl;
     final nama =
         context.watch<AuthProvider>().user?.nama.trim() ?? '';
     final displayName =
@@ -128,42 +145,42 @@ class HomeHeader extends StatelessWidget {
                 ),
 
                 // Avatar with online indicator
-                Stack(
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: AppColors.secondaryContainer,
-                          width: 2,
-                        ),
-                      ),
-                      padding: const EdgeInsets.all(2),
-                      // Unsplash dipakai karena mengirim header CORS
-                      // (i.pravatar.cc diblokir browser di Flutter Web).
-                      // Icon di bawah jadi fallback kalau gambar gagal load.
-                    child: _buildHomeAvatar(photo),
-
-                    ),
-                    Positioned(
-                      right: 0,
-                      bottom: 0,
-                      child: Container(
-                        width: 14,
-                        height: 14,
+                GestureDetector(
+                  onTap: () => _openProfile(context),
+                  behavior: HitTestBehavior.opaque,
+                  child: Stack(
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
                         decoration: BoxDecoration(
-                          color: AppColors.secondaryContainer,
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: AppColors.surface,
+                            color: AppColors.secondaryContainer,
                             width: 2,
                           ),
                         ),
+                        padding: const EdgeInsets.all(2),
+                        child: _buildHomeAvatar(photo, photoUrl),
                       ),
-                    ),
-                  ],
+                      Positioned(
+                        right: 0,
+                        bottom: 0,
+                        child: Container(
+                          width: 14,
+                          height: 14,
+                          decoration: BoxDecoration(
+                            color: AppColors.secondaryContainer,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppColors.surface,
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -174,20 +191,40 @@ class HomeHeader extends StatelessWidget {
       ),
     );
   }
-    /// Avatar home: foto tersimpan (kalau ada) atau foto default.
-  Widget _buildHomeAvatar(Uint8List? photo) {
-    if (photo == null) {
-      return const CircleAvatar(
+  /// Avatar home: URL server → cache lokal → foto default.
+  Widget _buildHomeAvatar(Uint8List? photo, String? photoUrl) {
+    if (photoUrl != null && photoUrl.isNotEmpty) {
+      return CircleAvatar(
         backgroundColor: AppColors.surfaceContainerHigh,
-        backgroundImage: NetworkImage(
-          'https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=150&h=150&fit=crop&crop=faces',
+        child: ClipOval(
+          child: Image.network(
+            photoUrl,
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+            errorBuilder: (_, _, _) =>
+                _buildLocalHomeAvatar(photo),
+          ),
         ),
       );
     }
-    // Bytes tersimpan langsung dipakai (aman di web & Android).
-    return CircleAvatar(
+
+    return _buildLocalHomeAvatar(photo);
+  }
+
+  Widget _buildLocalHomeAvatar(Uint8List? photo) {
+    if (photo != null) {
+      return CircleAvatar(
+        backgroundColor: AppColors.surfaceContainerHigh,
+        backgroundImage: MemoryImage(photo),
+      );
+    }
+
+    return const CircleAvatar(
       backgroundColor: AppColors.surfaceContainerHigh,
-      backgroundImage: MemoryImage(photo),
+      backgroundImage: NetworkImage(
+        'https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=150&h=150&fit=crop&crop=faces',
+      ),
     );
   }
 }

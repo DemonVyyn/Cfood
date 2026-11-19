@@ -3,8 +3,11 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../providers/auth_provider.dart';
+import '../../../providers/profile_photo_provider.dart';
 
 /// Halaman ganti foto profil: pilih dari galeri / kamera,
 /// lihat preview, lalu simpan.
@@ -57,16 +60,53 @@ class _ChangeProfilePhotoPageState
   }
 
   Future<void> _save() async {
-    if (_picked == null) return;
+    if (_picked == null || _isSaving) return;
 
-    setState(() => _isSaving = true);
+    final file = _picked!;
+    final bytes = await file.readAsBytes();
 
-    // Simulasi proses simpan (upload ke backend menyusul).
-    await Future.delayed(const Duration(milliseconds: 600));
+    if (bytes.length > 2 * 1024 * 1024) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Ukuran foto maksimal 2 MB.',
+            style: GoogleFonts.plusJakartaSans(),
+          ),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
 
     if (!mounted) return;
 
+    final auth = context.read<AuthProvider>();
+    final photoProvider = context.read<ProfilePhotoProvider>();
+
+    setState(() => _isSaving = true);
+
+    final success = await auth.updatePhoto(file);
+
+    if (!mounted) return;
     setState(() => _isSaving = false);
+
+    if (!success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            auth.errorMessage ?? 'Gagal mengunggah foto profil.',
+            style: GoogleFonts.plusJakartaSans(),
+          ),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    await photoProvider.setPhoto(file);
+
+    if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -82,8 +122,7 @@ class _ChangeProfilePhotoPageState
       ),
     );
 
-    // Kembalikan foto terpilih ke halaman profil.
-    Navigator.pop(context, _picked);
+    Navigator.pop(context, file);
   }
 
   @override

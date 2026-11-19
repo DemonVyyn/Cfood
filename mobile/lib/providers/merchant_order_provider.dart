@@ -12,9 +12,14 @@ class MerchantOrderProvider extends ChangeNotifier {
   bool isLoading = false;
   bool isConfirmingPickup = false;
   final Set<int> _verifyingOrderIds = {};
+  final Set<int> _cancellingOrderIds = {};
 
   bool isVerifyingPayment(int orderId) {
     return _verifyingOrderIds.contains(orderId);
+  }
+
+  bool isCancellingOrder(int orderId) {
+    return _cancellingOrderIds.contains(orderId);
   }
 
   Future<void> loadOrders() async {
@@ -59,6 +64,35 @@ class MerchantOrderProvider extends ChangeNotifier {
       return result;
     } finally {
       _verifyingOrderIds.remove(orderId);
+      notifyListeners();
+    }
+  }
+
+  Future<Map<String, dynamic>> cancelOrder(
+    int orderId,
+  ) async {
+    if (_cancellingOrderIds.contains(orderId)) {
+      throw Exception('Pembatalan pesanan sedang diproses.');
+    }
+
+    _cancellingOrderIds.add(orderId);
+    notifyListeners();
+
+    try {
+      final result =
+          await _service.cancelOrder(orderId);
+
+      if (result['success'] != true) {
+        throw Exception(
+          result['message']?.toString() ??
+              'Pesanan gagal dibatalkan.',
+        );
+      }
+
+      await loadOrders();
+      return result;
+    } finally {
+      _cancellingOrderIds.remove(orderId);
       notifyListeners();
     }
   }

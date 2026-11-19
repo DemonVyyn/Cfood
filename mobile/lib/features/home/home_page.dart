@@ -10,7 +10,12 @@ import 'widgets/category_section.dart';
 import 'widgets/surplus_food_card.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final VoidCallback? onProfileTap;
+
+  const HomePage({
+    super.key,
+    this.onProfileTap,
+  });
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -49,7 +54,7 @@ class _HomePageState extends State<HomePage> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: EdgeInsets.zero,
                 children: [
-                  const HomeHeader(),
+                  HomeHeader(onProfileTap: widget.onProfileTap),
                   const SearchSection(),
                   const SizedBox(height: 20),
                   const CategorySection(),

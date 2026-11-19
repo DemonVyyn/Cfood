@@ -21,15 +21,15 @@ class _EditProfilePageState
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
 
+  bool _isSaving = false;
+
   @override
   void initState() {
     super.initState();
-    // Prefill dari sesi login.
     final user = context.read<AuthProvider>().user;
     _nameController.text = user?.nama.trim() ?? '';
     _emailController.text = user?.email.trim() ?? '';
-    // Backend user belum punya no HP -> default kosong.
-    _phoneController.text = '';
+    _phoneController.text = user?.phone.trim() ?? '';
   }
 
   @override
@@ -40,11 +40,37 @@ class _EditProfilePageState
     super.dispose();
   }
 
-  void _save() {
+  Future<void> _save() async {
+    if (_isSaving) return;
     if (!_formKey.currentState!.validate()) return;
 
-    // Simpan lokal (belum ada endpoint update profil di backend).
-    // Nama & email bisa dikirim lewat AuthProvider bila tersedia.
+    final auth = context.read<AuthProvider>();
+    FocusScope.of(context).unfocus();
+
+    setState(() => _isSaving = true);
+
+    final success = await auth.updateProfile(
+      nama: _nameController.text.trim(),
+      email: _emailController.text.trim().toLowerCase(),
+      phone: _phoneController.text.trim(),
+    );
+
+    if (!mounted) return;
+    setState(() => _isSaving = false);
+
+    if (!success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            auth.errorMessage ?? 'Gagal memperbarui profil.',
+            style: GoogleFonts.plusJakartaSans(),
+          ),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -64,8 +90,6 @@ class _EditProfilePageState
 
   @override
   Widget build(BuildContext context) {
-    final topPadding = MediaQuery.of(context).padding.top;
-
     return Scaffold(
       backgroundColor: AppColors.surface,
 
@@ -75,8 +99,7 @@ class _EditProfilePageState
             // Header: tombol back + judul
             Container(
               color: AppColors.surface,
-              padding: EdgeInsets.fromLTRB(
-                  16, topPadding + 8, 16, 8),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
               child: Row(
                 children: [
                   // Tombol kembali
@@ -213,10 +236,12 @@ class _EditProfilePageState
                         width: double.infinity,
                         height: 48,
                         child: ElevatedButton(
-                          onPressed: _save,
+                          onPressed: _isSaving ? null : _save,
                           style: ElevatedButton.styleFrom(
                             backgroundColor:
                                 AppColors.ctaGreen,
+                            disabledBackgroundColor:
+                                AppColors.surfaceContainerHighest,
                             shape:
                                 RoundedRectangleBorder(
                               borderRadius:
@@ -225,16 +250,26 @@ class _EditProfilePageState
                             ),
                             elevation: 0,
                           ),
-                          child: Text(
-                            'Simpan',
-                            style: GoogleFonts
-                                .plusJakartaSans(
-                              fontSize: 14,
-                              height: 20 / 14,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.onPrimary,
-                            ),
-                          ),
+                          child: _isSaving
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child:
+                                      CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.onPrimary,
+                                  ),
+                                )
+                              : Text(
+                                  'Simpan',
+                                  style: GoogleFonts
+                                      .plusJakartaSans(
+                                    fontSize: 14,
+                                    height: 20 / 14,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.onPrimary,
+                                  ),
+                                ),
                         ),
                       ),
                     ],

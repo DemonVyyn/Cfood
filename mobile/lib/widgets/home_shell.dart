@@ -25,12 +25,18 @@ class _HomeShellState extends State<HomeShell> {
 
   // All pages are instantiated once, so their state (scroll position,
   // form data, etc.) is preserved while switching tabs.
-  final List<Widget> _pages = const [
-    HomePage(),
-    OrderHistoryPage(),
-    NotificationPage(),
-    ProfilePage(),
-  ];
+  late final List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      HomePage(onProfileTap: () => _onNavTap(3)),
+      const OrderHistoryPage(),
+      const NotificationPage(),
+      const ProfilePage(),
+    ];
+  }
 
   void _onNavTap(int index) {
     setState(() => _selectedIndex = index);

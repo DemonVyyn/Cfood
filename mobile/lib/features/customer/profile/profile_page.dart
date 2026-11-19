@@ -7,8 +7,10 @@ import '../../../core/theme/app_colors.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/profile_photo_provider.dart';
 import '../../customer/order_history/order_history_page.dart';
+import 'change_password_page.dart';
 import 'change_profile_photo_page.dart';
 import 'edit_profile_page.dart';
+import 'widgets/help_info_dialogs.dart';
 import 'widgets/profile_header.dart';
 import 'widgets/profile_menu_group.dart';
 
@@ -115,10 +117,8 @@ class _ProfilePageState extends State<ProfilePage> {
                         icon: Icons.lock,
                         title: 'Keamanan Akun',
                         subtitle: 'Ubah Kata Sandi',
-                        onTap: () => _showComingSoon(
-                          context,
-                          'Keamanan Akun',
-                        ),
+                        onTap: () =>
+                            _openChangePassword(context),
                       ),
                     ],
                   ),
@@ -143,26 +143,31 @@ class _ProfilePageState extends State<ProfilePage> {
                   // 4. Bantuan & Informasi
                   ProfileMenuGroup(
                     title: 'Bantuan & Informasi',
-                    items: const [
+                    items: [
                       ProfileMenuGroupItem(
                         icon: Icons.support_agent,
                         iconColor: AppColors.onSurfaceVariant,
                         title: 'Pusat Bantuan & Layanan Pelanggan',
+                        onTap: () => showHelpCenterDialog(context),
                       ),
                       ProfileMenuGroupItem(
                         icon: Icons.info,
                         iconColor: AppColors.onSurfaceVariant,
                         title: 'Tentang CFood',
+                        onTap: () =>
+                            showCFoodAboutDialog(context),
                       ),
                       ProfileMenuGroupItem(
                         icon: Icons.policy,
                         iconColor: AppColors.onSurfaceVariant,
                         title: 'Syarat Ketentuan & Kebijakan Privasi',
+                        onTap: () => showTermsDialog(context),
                       ),
                       ProfileMenuGroupItem(
                         icon: Icons.star,
                         iconColor: AppColors.onSurfaceVariant,
                         title: 'Beri Nilai Aplikasi di Play Store',
+                        onTap: () => showRateAppDialog(context),
                       ),
                     ],
                   ),
@@ -260,56 +265,44 @@ class _ProfilePageState extends State<ProfilePage> {
     // Ambil provider SEBELUM async gap agar tidak pakai context
     // setelah await (aman dari lint use_build_context_synchronously).
     final auth = context.read<AuthProvider>();
+    final photoProvider = context.read<ProfilePhotoProvider>();
 
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          backgroundColor: AppColors.surfaceContainerLowest,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(18),
           ),
-          title: Text(
-            'Keluar dari Akun',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 18,
-              height: 24 / 18,
-              fontWeight: FontWeight.w700,
+          title: const Text(
+            'Keluar dari Akun?',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
               color: AppColors.onSurface,
             ),
           ),
-          content: Text(
+          content: const Text(
             'Apakah Anda yakin ingin keluar dari akun CFood?',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 14,
-              height: 20 / 14,
-              color: AppColors.onSurfaceVariant,
-            ),
           ),
           actions: [
             TextButton(
-              onPressed: () =>
-                  Navigator.pop(dialogContext, false),
-              child: Text(
+              onPressed: () {
+                Navigator.pop(dialogContext, false);
+              },
+              child: const Text(
                 'Batal',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.onSurfaceVariant,
-                ),
+                style: TextStyle(color: Colors.grey),
               ),
             ),
-            TextButton(
-              onPressed: () =>
-                  Navigator.pop(dialogContext, true),
-              child: Text(
-                'Keluar',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.error,
-                ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(dialogContext, true);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
               ),
+              child: const Text('Logout'),
             ),
           ],
         );
@@ -319,6 +312,7 @@ class _ProfilePageState extends State<ProfilePage> {
     if (confirmed != true) return;
 
     await auth.logout();
+    await photoProvider.clear();
 
     if (!context.mounted) return;
 
@@ -336,6 +330,15 @@ class _ProfilePageState extends State<ProfilePage> {
       context,
       MaterialPageRoute(
         builder: (_) => const EditProfilePage(),
+      ),
+    );
+  }
+
+  void _openChangePassword(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const ChangePasswordPage(),
       ),
     );
   }

@@ -15,6 +15,12 @@ const List<String> _confirmedStatuses = [
   'diproses',
 ];
 
+const List<String> _cancellableStatuses = [
+  'menunggu_pembayaran',
+  'menunggu',
+  'diproses',
+];
+
 class OrderHistoryPage extends StatefulWidget {
   const OrderHistoryPage({super.key});
 
@@ -85,6 +91,64 @@ class _OrderHistoryPageState
       if (mounted) {
         setState(() => _isLoading = false);
       }
+    }
+  }
+
+  Future<void> _confirmCancel(
+    MerchantOrderModel order,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Batalkan Pesanan'),
+          content: Text(
+            'Batalkan pesanan #${order.id}? Stok akan '
+            'dikembalikan dan pembayaran akan disesuaikan.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () =>
+                  Navigator.pop(dialogContext, false),
+              child: const Text('Tidak'),
+            ),
+            ElevatedButton(
+              onPressed: () =>
+                  Navigator.pop(dialogContext, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Batalkan'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    try {
+      await OrderService().cancelOrder(order.id);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Pesanan berhasil dibatalkan.'),
+        ),
+      );
+
+      await _loadOrders(showPopup: false);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Gagal membatalkan pesanan: $e',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -251,6 +315,10 @@ class _OrderHistoryPageState
                             price:
                                 'Rp ${o.totalPrice.round()}',
                             status: _statusLabel(o.status),
+                            onCancel: _cancellableStatuses
+                                    .contains(o.status)
+                                ? () => _confirmCancel(o)
+                                : null,
                           ),
                         )
                         .toList(),

@@ -104,6 +104,74 @@ class _OrderListPageState extends State<OrderListPage>
     }
   }
 
+  Future<void> _cancelOrder(
+    MerchantOrderProvider provider,
+    int orderId,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Batalkan Pesanan'),
+          content: const Text(
+            'Pesanan ini akan dibatalkan. Stok akan '
+            'dikembalikan dan pembayaran disesuaikan. '
+            'Lanjutkan?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () =>
+                  Navigator.pop(dialogContext, false),
+              child: const Text('Tidak'),
+            ),
+            ElevatedButton(
+              onPressed: () =>
+                  Navigator.pop(dialogContext, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red.shade700,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Batalkan'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    try {
+      final result = await provider.cancelOrder(orderId);
+
+      if (!mounted) return;
+
+      final message = result['message']?.toString() ??
+          'Pesanan berhasil dibatalkan.';
+
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: darkGreen,
+          ),
+        );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(
+              e.toString().replaceFirst('Exception: ', ''),
+            ),
+            backgroundColor: Colors.red.shade700,
+          ),
+        );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -200,7 +268,9 @@ class _OrderListPageState extends State<OrderListPage>
           totalPrice: order.totalPrice.toInt(),
           paymentStatus: order.paymentStatus,
           isVerifying: provider.isVerifyingPayment(order.id),
+          isCancelling: provider.isCancellingOrder(order.id),
           onVerifyPayment: () => _verifyPayment(provider, order.id),
+          onCancel: () => _cancelOrder(provider, order.id),
         );
       },
     );

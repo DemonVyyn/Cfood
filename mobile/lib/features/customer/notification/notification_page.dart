@@ -76,6 +76,29 @@ class _NotificationPageState
   int get _unreadCount =>
       _orders.where(_isUnread).length;
 
+  void _markAllRead() {
+    setState(() {
+      _readIds.addAll(_orders.map((o) => o.id));
+      _onlyUnread = false;
+    });
+  }
+
+  void _markAllUnread() {
+    setState(() {
+      _readIds.clear();
+      _onlyUnread = false;
+    });
+  }
+
+  void _markAsRead(int id) {
+    setState(() {
+      _readIds.add(id);
+      if (_onlyUnread && _unreadCount == 0) {
+        _onlyUnread = false;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final visible = _visibleOrders;
@@ -83,14 +106,16 @@ class _NotificationPageState
       appBar: AppBar(
         title: const Text('Notifikasi'),
         actions: [
-          if (_unreadCount > 0)
+          if (_orders.isNotEmpty)
             TextButton(
-              onPressed: () => setState(
-                () => _readIds.addAll(
-                  _orders.map((o) => o.id),
-                ),
+              onPressed: _unreadCount > 0
+                  ? _markAllRead
+                  : _markAllUnread,
+              child: Text(
+                _unreadCount > 0
+                    ? 'Tandai dibaca'
+                    : 'Tandai belum dibaca',
               ),
-              child: const Text('Tandai dibaca'),
             ),
         ],
       ),
@@ -117,11 +142,18 @@ class _NotificationPageState
                               DismissDirection.endToStart,
                           background:
                               _buildDismissBackground(),
-                          onDismissed: (_) => setState(
-                            () => _orders.removeWhere(
-                              (x) => x.id == o.id,
-                            ),
-                          ),
+                          onDismissed: (_) {
+                            setState(() {
+                              _orders.removeWhere(
+                                (x) => x.id == o.id,
+                              );
+                              _readIds.remove(o.id);
+                              if (_onlyUnread &&
+                                  _unreadCount == 0) {
+                                _onlyUnread = false;
+                              }
+                            });
+                          },
                           child: NotificationCard(
                             title: _titleFor(o),
                             message: _messageFor(o),
@@ -130,9 +162,7 @@ class _NotificationPageState
                             iconColor: _colorFor(o),
                             isUnread: _isUnread(o),
                             onTap: () {
-                              setState(
-                                () => _readIds.add(o.id),
-                              );
+                              _markAsRead(o.id);
                               _showDetail(o);
                             },
                           ),
@@ -160,8 +190,10 @@ class _NotificationPageState
         FilterChip(
           label: const Text('Belum dibaca'),
           selected: _onlyUnread,
-          onSelected: (v) =>
-              setState(() => _onlyUnread = v),
+          onSelected: _unreadCount == 0
+              ? null
+              : (v) =>
+                  setState(() => _onlyUnread = v),
           selectedColor: Colors.green.shade100,
         ),
       ],
@@ -189,6 +221,25 @@ class _NotificationPageState
                 color: Colors.grey.shade600,
               ),
             ),
+            if (_orders.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              if (_onlyUnread)
+                OutlinedButton.icon(
+                  onPressed: () => setState(
+                    () => _onlyUnread = false,
+                  ),
+                  icon: const Icon(Icons.list_alt),
+                  label: const Text('Tampilkan semua'),
+                ),
+              const SizedBox(height: 8),
+              TextButton.icon(
+                onPressed: _markAllUnread,
+                icon: const Icon(Icons.email_outlined),
+                label: const Text(
+                  'Tandai semua belum dibaca',
+                ),
+              ),
+            ],
           ],
         ),
       ),

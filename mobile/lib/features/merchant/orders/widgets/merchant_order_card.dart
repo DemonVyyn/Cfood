@@ -10,7 +10,9 @@ class MerchantOrderCard extends StatelessWidget {
   final int totalPrice;
   final String paymentStatus;
   final bool isVerifying;
+  final bool isCancelling;
   final VoidCallback onVerifyPayment;
+  final VoidCallback onCancel;
 
   const MerchantOrderCard({
     super.key,
@@ -22,7 +24,9 @@ class MerchantOrderCard extends StatelessWidget {
     required this.totalPrice,
     required this.paymentStatus,
     required this.isVerifying,
+    required this.isCancelling,
     required this.onVerifyPayment,
+    required this.onCancel,
   });
 
   static const Color primaryGreen = Color(0xFF14DE32);
@@ -53,6 +57,12 @@ class MerchantOrderCard extends StatelessWidget {
 
   bool get _canVerifyPayment {
     return _isWaitingForPayment && _isPaymentPending;
+  }
+
+  bool get _canCancel {
+    return _normalizedStatus == 'menunggu_pembayaran' ||
+        _normalizedStatus == 'menunggu' ||
+        _normalizedStatus == 'diproses';
   }
 
   Color _statusColor() {
@@ -287,56 +297,100 @@ class MerchantOrderCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              if (_canVerifyPayment)
-                Flexible(
-                  child: ElevatedButton.icon(
-                    onPressed: isVerifying ? null : onVerifyPayment,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: darkGreen,
-                      foregroundColor: Colors.white,
-                      disabledBackgroundColor: Colors.grey.shade400,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 12,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    icon: isVerifying
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Icon(
-                            Icons.verified_outlined,
-                            size: 18,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (_canVerifyPayment)
+                    SizedBox(
+                      width: 124,
+                      child: ElevatedButton.icon(
+                        onPressed: isVerifying ? null : onVerifyPayment,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: darkGreen,
+                          foregroundColor: Colors.white,
+                          disabledBackgroundColor: Colors.grey.shade400,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 12,
                           ),
-                    label: Text(
-                      isVerifying ? 'Memproses' : 'Verifikasi',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        icon: isVerifying
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Icon(
+                                Icons.verified_outlined,
+                                size: 18,
+                              ),
+                        label: Text(
+                          isVerifying ? 'Memproses' : 'Verifikasi',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                )
-              else if (_normalizedPaymentStatus == 'paid' &&
-                  _normalizedStatus == 'siap_diambil')
-                _buildStatusBadge(
-                  label: 'Siap Diambil',
-                  color: Colors.blue,
-                )
-              else if (_normalizedStatus == 'selesai')
-                _buildStatusBadge(
-                  label: 'Selesai',
-                  color: darkGreen,
-                ),
+                  if (_canCancel)
+                    TextButton.icon(
+                      onPressed: isCancelling ? null : onCancel,
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.red,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        tapTargetSize:
+                            MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      icon: isCancelling
+                          ? const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.red,
+                              ),
+                            )
+                          : const Icon(
+                              Icons.cancel_outlined,
+                              size: 16,
+                            ),
+                      label: Text(
+                        isCancelling ? 'Membatalkan' : 'Batalkan',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  if (!_canVerifyPayment &&
+                      !_canCancel &&
+                      _normalizedPaymentStatus == 'paid' &&
+                      _normalizedStatus == 'siap_diambil')
+                    _buildStatusBadge(
+                      label: 'Siap Diambil',
+                      color: Colors.blue,
+                    ),
+                  if (!_canVerifyPayment &&
+                      !_canCancel &&
+                      _normalizedStatus == 'selesai')
+                    _buildStatusBadge(
+                      label: 'Selesai',
+                      color: darkGreen,
+                    ),
+                ],
+              ),
             ],
           ),
         ],

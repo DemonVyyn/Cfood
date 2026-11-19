@@ -37,6 +37,26 @@ class MerchantOrderService {
   }
 }
 
+  Future<Map<String, dynamic>> cancelOrder(int orderId) async {
+    try {
+      final response = await ApiClient.dio.post(
+        '/merchant/orders/$orderId/cancel',
+        options: Options(headers: await _headers()),
+      );
+
+      return Map<String, dynamic>.from(response.data);
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      final message = data is Map
+          ? data['message']?.toString()
+          : null;
+
+      throw Exception(
+        message ?? 'Gagal membatalkan pesanan. Periksa koneksi dan coba lagi.',
+      );
+    }
+  }
+
   Future<List<dynamic>> getOrders() async {
     final response = await ApiClient.dio.get(
       '/merchant/orders',

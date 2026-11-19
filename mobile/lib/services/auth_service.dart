@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../core/network/api_client.dart';
 
@@ -92,6 +93,94 @@ class AuthService {
         },
       ),
     );
+  }
+
+  Future<Map<String, dynamic>> updateProfile({
+    required String token,
+    required String nama,
+    required String email,
+    required String phone,
+  }) async {
+    try {
+      final response = await ApiClient.dio.put(
+        '/profile',
+        data: {
+          'nama': nama,
+          'email': email,
+          'phone': phone,
+        },
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Accept': 'application/json',
+          },
+        ),
+      );
+
+      return Map<String, dynamic>.from(
+        response.data as Map,
+      );
+    } on DioException catch (e) {
+      throw _extractError(e);
+    }
+  }
+
+  Future<Map<String, dynamic>> uploadProfilePhoto({
+    required String token,
+    required XFile file,
+  }) async {
+    try {
+      final bytes = await file.readAsBytes();
+
+      final formData = FormData.fromMap({
+        'foto_profil': MultipartFile.fromBytes(
+          bytes,
+          filename: file.name,
+        ),
+      });
+
+      final response = await ApiClient.dio.post(
+        '/profile/photo',
+        data: formData,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Accept': 'application/json',
+          },
+        ),
+      );
+
+      return Map<String, dynamic>.from(
+        response.data as Map,
+      );
+    } on DioException catch (e) {
+      throw _extractError(e);
+    }
+  }
+
+  Future<void> changePassword({
+    required String token,
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      await ApiClient.dio.put(
+        '/profile/password',
+        data: {
+          'current_password': currentPassword,
+          'password': newPassword,
+          'password_confirmation': newPassword,
+        },
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Accept': 'application/json',
+          },
+        ),
+      );
+    } on DioException catch (e) {
+      throw _extractError(e);
+    }
   }
 
   String _extractError(

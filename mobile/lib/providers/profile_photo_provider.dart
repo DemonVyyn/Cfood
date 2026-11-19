@@ -50,4 +50,14 @@ class ProfilePhotoProvider extends ChangeNotifier {
 
     notifyListeners();
   }
+
+  /// Hapus foto lokal, misalnya saat user logout.
+  Future<void> clear() async {
+    _photoBytes = null;
+    _isLoaded = true;
+
+    await StorageService.clearProfilePhotoBase64();
+
+    notifyListeners();
+  }
 }

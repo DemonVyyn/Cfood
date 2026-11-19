@@ -151,8 +151,7 @@ class _SearchSectionState
               .foods
               .map((f) => f.namaToko)
               .where((n) => n.isNotEmpty)
-              .toSet()
-              .toList(),
+              .toSet(),
         ];
 
         return Padding(

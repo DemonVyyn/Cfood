@@ -15,8 +15,14 @@ class StoreInfoCard extends StatelessWidget {
     return Consumer<MerchantProvider>(
       builder: (context, provider, child) {
         final dashboard = provider.dashboard;
+        final profile = provider.profile;
 
-        final storeName = dashboard?.storeName.trim() ?? '';
+        final storeName =
+            (profile?.storeName.trim() ?? '').isNotEmpty
+                ? profile!.storeName.trim()
+                : dashboard?.storeName.trim() ?? '';
+        final address = profile?.address.trim() ?? '';
+        final phone = profile?.phone.trim() ?? '';
 
         return Container(
           padding: const EdgeInsets.all(18),
@@ -49,17 +55,21 @@ class StoreInfoCard extends StatelessWidget {
                   ),
                   TextButton.icon(
                     onPressed: () async {
-                      final updated = await Navigator.push<bool>(
+                      final merchantProvider =
+                          context.read<MerchantProvider>();
+
+                      final updated =
+                          await Navigator.push<bool>(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => const EditStoreProfilePage(),
+                          builder: (_) =>
+                              const EditStoreProfilePage(),
                         ),
                       );
 
                       if (updated == true && context.mounted) {
-                        await context
-                            .read<MerchantProvider>()
-                            .refreshDashboard();
+                        await merchantProvider.refreshDashboard();
+                        await merchantProvider.refreshProfile();
                       }
                     },
                     icon: const Icon(Icons.edit_outlined, size: 17),
@@ -88,7 +98,9 @@ class StoreInfoCard extends StatelessWidget {
               _buildInfoItem(
                 icon: Icons.location_on_outlined,
                 title: 'Alamat Toko',
-                subtitle: 'Data alamat perlu disediakan oleh API mitra',
+                subtitle: address.isNotEmpty
+                    ? address
+                    : 'Alamat toko belum tersedia',
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 14),
@@ -100,7 +112,9 @@ class StoreInfoCard extends StatelessWidget {
               _buildInfoItem(
                 icon: Icons.phone_outlined,
                 title: 'Nomor Telepon',
-                subtitle: 'Data telepon perlu disediakan oleh API mitra',
+                subtitle: phone.isNotEmpty
+                    ? phone
+                    : 'Nomor telepon belum tersedia',
               ),
             ],
           ),

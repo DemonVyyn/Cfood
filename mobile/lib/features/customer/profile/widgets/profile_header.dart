@@ -22,6 +22,8 @@ class ProfileHeader extends StatelessWidget {
     final user = context.watch<AuthProvider>().user;
     final nama = user?.nama.trim() ?? '';
     final email = user?.email.trim() ?? '';
+    final phone = user?.phone.trim() ?? '';
+    final photoUrl = user?.fotoProfilUrl;
     final photo = context.watch<ProfilePhotoProvider>().photo;
 
     return GestureDetector(
@@ -65,7 +67,7 @@ class ProfileHeader extends StatelessWidget {
                     ),
                   ),
                   child: ClipOval(
-                    child: _buildAvatar(photo),
+                    child: _buildAvatar(photo, photoUrl),
                   ),
                 ),
 
@@ -114,9 +116,7 @@ class ProfileHeader extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    // Backend belum punya field nomor HP user;
-                    // ganti baris ini dengan data user saat API siap.
-                    'Nomor HP belum ditambahkan',
+                    phone.isNotEmpty ? phone : '-',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.plusJakartaSans(
@@ -153,27 +153,39 @@ class ProfileHeader extends StatelessWidget {
     );
   }
 
-  /// Tampilan avatar: foto tersimpan (jika ada) atau foto default.
-  Widget _buildAvatar(Uint8List? photo) {
-    if (photo == null) {
-      // Foto default (Unsplash: mengirim header CORS, aman di web)
+  /// Tampilan avatar: URL server → cache lokal → foto default.
+  Widget _buildAvatar(Uint8List? photo, String? photoUrl) {
+    if (photoUrl != null && photoUrl.isNotEmpty) {
       return Image.network(
-        'https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=150&h=150&fit=crop&crop=faces',
+        photoUrl,
         fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => Container(
-          color: AppColors.surfaceContainerHigh,
-          child: const Icon(
-            Icons.person,
-            size: 32,
-            color: AppColors.onSurfaceVariant,
-          ),
-        ),
+        errorBuilder: (_, _, _) =>
+            _buildLocalAvatar(photo),
       );
     }
 
-    return Image.memory(
-      photo,
+    return _buildLocalAvatar(photo);
+  }
+
+  Widget _buildLocalAvatar(Uint8List? photo) {
+    if (photo != null) {
+      return Image.memory(
+        photo,
+        fit: BoxFit.cover,
+      );
+    }
+
+    return Image.network(
+      'https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=150&h=150&fit=crop&crop=faces',
       fit: BoxFit.cover,
+      errorBuilder: (_, _, _) => Container(
+        color: AppColors.surfaceContainerHigh,
+        child: const Icon(
+          Icons.person,
+          size: 32,
+          color: AppColors.onSurfaceVariant,
+        ),
+      ),
     );
   }
 }

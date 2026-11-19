@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../../../providers/merchant_provider.dart';
 
 class EditStoreProfilePage extends StatefulWidget {
   const EditStoreProfilePage({super.key});
@@ -17,6 +20,21 @@ class _EditStoreProfilePageState extends State<EditStoreProfilePage> {
   final _addressController = TextEditingController();
   final _phoneController = TextEditingController();
 
+  bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    final profile = context.read<MerchantProvider>().profile;
+    _storeNameController.text =
+        profile?.storeName.trim() ?? '';
+    _addressController.text =
+        profile?.address.trim() ?? '';
+    _phoneController.text =
+        profile?.phone.trim() ?? '';
+  }
+
   @override
   void dispose() {
     _storeNameController.dispose();
@@ -25,16 +43,47 @@ class _EditStoreProfilePageState extends State<EditStoreProfilePage> {
     super.dispose();
   }
 
-  void _saveProfile() {
+  Future<void> _saveProfile() async {
+    if (_isSaving) return;
     if (!_formKey.currentState!.validate()) return;
+
+    final provider = context.read<MerchantProvider>();
+    FocusScope.of(context).unfocus();
+
+    setState(() => _isSaving = true);
+
+    final success = await provider.updateProfile(
+      storeName: _storeNameController.text.trim(),
+      address: _addressController.text.trim(),
+      phone: _phoneController.text.trim(),
+    );
+
+    if (!mounted) return;
+    setState(() => _isSaving = false);
+
+    if (!success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            provider.error ?? 'Gagal menyimpan profil toko.',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    await provider.refreshDashboard();
+
+    if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text(
-          'Form valid. Hubungkan tombol simpan ke API Laravel untuk menyimpan perubahan.',
-        ),
+        content: Text('Profil toko berhasil disimpan.'),
       ),
     );
+
+    Navigator.pop(context, true);
   }
 
   InputDecoration _inputDecoration({
@@ -174,17 +223,29 @@ class _EditStoreProfilePageState extends State<EditStoreProfilePage> {
               SizedBox(
                 height: 52,
                 child: ElevatedButton.icon(
-                  onPressed: _saveProfile,
-                  icon: const Icon(Icons.save_outlined),
-                  label: const Text(
-                    'Simpan Perubahan',
-                    style: TextStyle(
+                  onPressed: _isSaving ? null : _saveProfile,
+                  icon: _isSaving
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Icon(Icons.save_outlined),
+                  label: Text(
+                    _isSaving
+                        ? 'Menyimpan...'
+                        : 'Simpan Perubahan',
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: darkGreen,
+                    disabledBackgroundColor: Colors.grey.shade300,
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
