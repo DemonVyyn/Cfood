@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use App\Services\AuditTrail;
+use App\Services\OrderCancellation;
 
 class OrderController extends Controller
 {
@@ -180,6 +181,43 @@ class OrderController extends Controller
         return response()->json([
             'success' => true,
             'data' => $orders,
+        ]);
+    }
+
+    /**
+     * Membatalkan pesanan milik customer yang sedang login.
+     */
+    public function cancel(Request $request, int $id)
+    {
+        $customer = $request->user();
+
+        if (!$customer || $customer->role !== 'customer') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Hanya akun customer yang dapat membatalkan pesanan ini.',
+            ], 403);
+        }
+
+        $order = Pesanan::where('customer_id', $customer->id)
+            ->findOrFail($id);
+
+        try {
+            $cancelled = app(OrderCancellation::class)->cancel(
+                $order,
+                'Customer',
+                $request->input('alasan')
+            );
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pesanan berhasil dibatalkan.',
+            'data' => $cancelled,
         ]);
     }
 

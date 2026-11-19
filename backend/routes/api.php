@@ -37,6 +37,7 @@ Route::middleware(['auth:sanctum', 'role:customer'])
         Route::post('/orders', [OrderController::class, 'store']);
         Route::get('/orders', [OrderController::class, 'index']);
         Route::get('/orders/{id}', [OrderController::class, 'show']);
+        Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel']);
 
         // Notification Management
         Route::get('/notifications', [NotificationController::class, 'index']);
@@ -67,6 +68,17 @@ Route::middleware(['auth:sanctum', 'role:mitra'])
         Route::get(
             '/merchant/dashboard',
             [MerchantController::class, 'dashboard']
+        );
+
+        // Profil Toko Mitra
+        Route::get(
+            '/merchant/profile',
+            [MerchantController::class, 'profile']
+        );
+
+        Route::put(
+            '/merchant/profile',
+            [MerchantController::class, 'updateProfile']
         );
 
         // Product Management (CRUD)
@@ -113,6 +125,12 @@ Route::middleware(['auth:sanctum', 'role:mitra'])
             [MerchantController::class, 'confirmPickup']
         );
 
+        // Pembatalan Pesanan
+        Route::post(
+            '/merchant/orders/{id}/cancel',
+            [MerchantController::class, 'cancelOrder']
+        );
+
         // Notification Management
         Route::get(
             '/merchant/notifications',
@@ -149,6 +167,9 @@ Route::middleware('auth:sanctum')
 
         // User Profile
         Route::get('/profile', [AuthController::class, 'profile']);
+        Route::put('/profile', [AuthController::class, 'update']);
+        Route::post('/profile/photo', [AuthController::class, 'updatePhoto']);
+        Route::put('/profile/password', [AuthController::class, 'changePassword']);
 
         // Logout
         Route::post('/logout', [AuthController::class, 'logout']);

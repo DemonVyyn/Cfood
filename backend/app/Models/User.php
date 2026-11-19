@@ -33,6 +33,23 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    protected $appends = [
+        'foto_profil_url',
+    ];
+
+    public function getFotoProfilUrlAttribute(): ?string
+    {
+        if (!$this->foto_profil) {
+            return null;
+        }
+
+        if (filter_var($this->foto_profil, FILTER_VALIDATE_URL)) {
+            return $this->foto_profil;
+        }
+
+        return url('storage/' . ltrim($this->foto_profil, '/'));
+    }
+
     protected function casts(): array
     {
         return [
