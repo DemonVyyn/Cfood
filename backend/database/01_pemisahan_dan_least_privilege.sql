@@ -10,7 +10,7 @@ CREATE DATABASE IF NOT EXISTS cfood
 
 -- 2. Account khusus aplikasi (BUKAN root)
 CREATE USER IF NOT EXISTS 'cfood_app'@'localhost'
-  IDENTIFIED BY 'CfoodApp2026!';
+  IDENTIFIED BY 'CfoodApp2026';
 
 -- 3. Account khusus backup (hanya butuh baca)
 CREATE USER IF NOT EXISTS 'cfood_backup'@'localhost'
